@@ -2,7 +2,6 @@
 -- helper functions for global namespace to work with the ui.objects
 -- depends on libsota.0.5.x
 
-
 --[[
  * libsota.util.lua
  * Copyright (C) 2019 Michael Fritscher <catweazle@tunipages.de>
@@ -23,12 +22,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.";
 ]]
 
-
-
 --- credits
 -- that_shawn_guy - string.rect (from his offsetCenter)
 -- Toular - for helping me to find a font size multiplier that helps with fontsize at different resolutions.
-
 
 
 -- timer utility functions
@@ -141,6 +137,7 @@ function moveLabelTo(label, x, y)
 		label.shadow.rect.left = x + 1
 		label.shadow.rect.top = y + 1
 	end
+  
 	label.rect.left = x
 	label.rect.top = y
 end
@@ -154,6 +151,7 @@ function resizeLabelTo(label, w, h)
 		label.shadow.rect.width = width
 		label.shadow.rect.height = height
 	end
+  
 	label.rect.width = w
 	label.rect.height = h
 end
@@ -163,6 +161,7 @@ function setLabelRect(label, rect)
 	if label.shadow then
 		ui.guiObject.rect(label.shadow, rect:moveBy(1, 1))
 	end
+  
 end
 
 -- requested by that_shawn_guy
@@ -260,9 +259,11 @@ end
 function ui.onShortcutPressed(...)
 	return ui.shortcut.add("pressed", ...)
 end
+
 function ui.onShortcut(...)
 	return ui.shortcut.add("watch", ...)
 end
+
 ui.registerKey = ui.onShortcutPress -- depricated: ui.registerKey is about to be removed]]
 
 ui.onCommand = ui.command.add
@@ -277,6 +278,7 @@ string.style = function(string, style)
 	if style.size then string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>" end
 	return string
 end
+
 string.rect = function(string)
 	local str = string:gsub("<[^>]*>", "")
 	local s = tonumber(string:match("<size=(%d-)>"))
@@ -299,6 +301,7 @@ rect = {
 	_new = function(self, left, top, width, height)
 		return self.new(left, top, width, height)
 	end,
+  
 	new = function(left, top, width, height)
 		local r = {
 			left = left,
@@ -313,12 +316,14 @@ rect = {
 			width = tonumber(string.match(width, "^%d+"))
 			r.width = client.screen.width / 100 * math.abs(width)
 		end
+    
 		if not height then
 			r.height = client.screen.height / 3.6
 		elseif tonumber(height) == nil then
 			height = tonumber(string.match(height, "^%d+"))
 			r.height = client.screen.height / 100 * math.abs(height)
 		end
+    
 		if not left then
 			r.left = (client.screen.width - r.width) / 2
 		elseif tonumber(left) == nil then
@@ -329,6 +334,7 @@ rect = {
 				r.left = client.screen.width / 100 * left
 			end
 		end
+    
 		if not top then
 			r.top = (client.screen.height - r.height) / 2
 		elseif tonumber(top) == nil then
@@ -375,12 +381,8 @@ rect = {
 setmetatable(rect, {__call = rect._new})
 
 
-
-
 -- implement Shroud calls
-function ShroudOnConsoleInput() end
-function ShroudOnGUI() end
-function ShroudOnUpdate() end
+
 function ShroudOnStart()
 	ui.onInit(function()
 		ui.command.add("lua", function(source, action)
@@ -413,20 +415,20 @@ function ShroudOnStart()
 			elseif action == "inventory" then
 				for _,i in next, player.inventory do
 					if not param or i.name:lower():find(param:lower()) then
-					if i.quantity > 1 then
-						-- stack value / quantity
-						ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
-					elseif i.maxDurability > 0 then
-						local c = "73d216"
-						if i.durability < 1 then
-							c = "cc0000"
-						elseif i.durability / i.maxDurability < 0.25 then
-							c = "edd400"
-						end
-						ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
-					else
-						ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
-					end
+            if i.quantity > 1 then
+              -- stack value / quantity
+              ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
+            elseif i.maxDurability > 0 then
+              local c = "73d216"
+              if i.durability < 1 then
+                c = "cc0000"
+              elseif i.durability / i.maxDurability < 0.25 then
+                c = "edd400"
+              end
+              ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
+            else
+              ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
+            end
 					end
 				end
 			elseif action == "client" or action == "player" or action == "scene" or action == "ui" then
@@ -448,9 +450,11 @@ function ShroudOnStart()
 				for _,t in next, ui.texture._loaded do
 					ui.consoleLog(string.format("texture %d: %s (%d x %d)", t.id, t.filename, t.width, t.height))
 				end
+        
 				for n in next, ui.command.list do
 					ui.consoleLog("command: "..n)
 				end
+        
 				for k,r in next, ui.shortcut.list.pressed do
 					for _,t in next, r do
 						local s = k
@@ -460,6 +464,7 @@ function ShroudOnStart()
 						ui.consoleLog("shortcut pressed: "..s)
 					end
 				end
+        
 				for k,r in next, ui.shortcut.list.watch do
 					for _,t in next, r do
 						local s = k
@@ -472,4 +477,16 @@ function ShroudOnStart()
 			end
 		end)
 	end)
+end
+
+
+-- implement other ShroudOn... to allow other scripts
+
+function ShroudOnConsoleInput()
+end
+
+function ShroudOnGUI()
+end
+
+function ShroudOnUpdate()
 end

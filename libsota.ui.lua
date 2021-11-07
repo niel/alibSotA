@@ -1,7 +1,6 @@
 -- libsota.ui by Catweazle Waldschrath
 -- depends on libsota.0.5.x
 
-
 --[[
  * libsota.ui.lua
  * Copyright (C) 2019 Michael Fritscher <catweazle@tunipages.de>
@@ -35,24 +34,30 @@ ui.rect = function(left, top, width, height)
 		y2 = top + height,
 		z = 0,
 	}
+  
 	self.hittest = function(x, y)
 		return x > self.left and y > self.top and x < self.left + self.width and y < self.top + self.height
 	end
+  
 	self.pxHittest = function(x, y)
 		return x > self.x1 and y > self.y1 and x < self.x2 and y < self.y2
 	end
+  
 	self.moveTo = function(x, y)
 		self.left = x
 		self.top = y
 	end
+  
 	self.moveBy = function(dx, dy)
 		self.left = self.left + x
 		self.top = self.top + y
 	end
+  
 	self.resizeTo = function(w, h)
 		self.width = w
 		self.height = h
 	end
+  
 	self.resizeBy = function(dw, dh)
 		self.width = self.width + dw
 		self.height = self.height + dh
@@ -70,6 +75,7 @@ ui.container = {
 		setmetatable(self, {__index = ui.container})
 		return self
 	end,
+  
 	add = function(self, name, object, left, top, width, height)
 		self.list[tostring(name)] = object
 		object.name = name
@@ -82,13 +88,16 @@ ui.container = {
 		}
 		self:refresh()
 	end,
+  
 	get = function(name)
 		return self.list[tostring(name)]
 	end,
+  
 	remove = function(name)
 		self.list[tostring(name)]:remove()
 		self.list[tostring(name)] = nil
 	end,
+  
 	refresh = function(self)
 		for _,o in next, self.list do
 			--[[o.rect.left = self.rect.left + o.clientRect.left
@@ -100,6 +109,7 @@ ui.container = {
 			o:resizeTo(o.clientRect.width, o.clientRect.height)
 		end
 	end,
+  
 	zIndex = function(self, zIndex)
 		if zIndex then
 		print(zIndex)
@@ -110,26 +120,31 @@ ui.container = {
 		end
 		return self.rect.z
 	end,
+  
 	visible = function(self, visible)
 		for _,o in next, self.list do
 			o:visible(visible)
 		end
 	end,
+  
 	moveTo = function(self, x, y)
 		self.rect.left = x
 		self.rect.top = y
 		self:refresh()
 	end,
+  
 	moveBy = function(self, x, y)
 		self.rect.left = self.rect.left + x
 		self.rect.top = self.rect.top + y
 		self:refresh()
 	end,
+  
 	resizeTo = function(self, w, h)
 		self.rect.width = w
 		self.rect.height = h
 		self:refresh()
 	end,
+  
 	resizeBy = function(self, w, h)
 		self.rect.width = self.rect.width + w
 		self.rect.height = self.rect.height + h
@@ -141,6 +156,7 @@ ui.titlebar = {
 	_new = function(self, caption, icon)
 		return self:new(caption, icon)
 	end,
+  
 	new = function(caption, icon)
 		local lbl = ui.text(caption:style({ size = 14, bold = true }))
 		local ico = ui.image(icon)
@@ -151,12 +167,14 @@ ui.titlebar = {
 		self:add("_icon", ico, 2, 2, 24, 24)
 		return self
 	end,
+  
 	caption = function(self, caption)
 		if caption then
 			self.list["_caption"].caption = caption
 		end
 		return self.list["_caption"].caption
 	end,
+  
 	icon = function(self, icon)
 		if icon then
 			self.list["_icon"] = icon
@@ -170,6 +188,7 @@ ui.button = {
 	_new = function(self, caption)
 		return self:new(caption)
 	end,
+  
 	new = function(caption)
 		local lbl = ui.text(caption:style({ size = 14, bold = true }))
 		local ico = ui.image("share/libsota/border3.png")
@@ -178,12 +197,14 @@ ui.button = {
 		self:add("_icon", ico, 0, 0, self.rect.width, 32)
 		return self
 	end,
+  
 	caption = function(self, caption)
 		if caption then
 			self.list["_caption"].caption = caption
 		end
 		return self.list["_caption"].caption
 	end,
+  
 	icon = function(self, icon)
 		if icon then
 			self.list["_icon"] = icon
@@ -225,6 +246,7 @@ ui.application = {
 			self.list[#self.list + 1] = tex
 			return tex
 		end
+    
 		ui.texture.add = self.texture
 		ui.image = function(filename, scaleMode)
 			return ui_tex(0, 0, filename, true, scaleMode)
@@ -236,6 +258,7 @@ ui.application = {
 			self.list[#self.list + 1] = lbl
 			return lbl
 		end
+    
 		ui.label.add = self.label
 		ui.text = function(text)
 			local r = text:rect()
@@ -244,11 +267,13 @@ ui.application = {
 
 		return ui.shell.list[tostring(name)]
 	end,
+  
 	remove = function(self)
 		for _,o in next, self.list do
 			o:remove()
 		end
 	end,
+  
 	createWindow = function(self, name, rect)
 		self.list[tostring(name)] = {
 			typeName = "window",
@@ -276,6 +301,7 @@ ui.shell = {
 		local app = ui.shell.list[tostring(name)]
 		if app and app.onActivate then app.onActivate() end
 	end,
+  
 	deactivate = function(name)
 		local app = ui.shell.list[tostring(name)]
 		if app then
@@ -285,6 +311,7 @@ ui.shell = {
 			end
 		end
 	end,
+  
 	onMouseMove = function(button, x, y)
 		if ui.shell.hover and not ui.shell.hover.object.rect.hittest(x, y) then
 			if ui.shell.hover.object.onMouseLeave then ui.shell.hover.object.onMouseLeave() end
@@ -308,6 +335,7 @@ ui.shell = {
 			end
 		end
 	end,
+  
 	onMouseButton = function(state, button, x, y)
 		if ui.shell.draging and state == "held" and button == 1 then
 			local f = ui.shell.draging
@@ -349,8 +377,8 @@ ui.shell = {
 				end
 			end
 		end
-
 	end,
+  
 	onStart = function()
 		for _,a in next, ui.shell.list do
 			if a.onActivate then a.onActivate() end
@@ -360,7 +388,6 @@ ui.shell = {
 
 
 function ShroudOnStart()
-
 	ui.onInit(function()
 		--[[ starter für später
 		local texheight = 450 * client.screen.pxptRatio
@@ -382,7 +409,12 @@ function ShroudOnStart()
 end -- ShroudOnStart
 
 -- implement other ShroudOn... to allow other scripts
-function ShroudOnConsoleInput() end
-function ShroudOnGUI() end
-function ShroudOnUpdate() end
+function ShroudOnConsoleInput()
+end
+
+function ShroudOnGUI()
+end
+
+function ShroudOnUpdate()
+end
 

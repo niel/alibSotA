@@ -1,6 +1,5 @@
 -- libsota.0.5.d by Catweazle Waldschrath
 
-
 --[[
  * libsota.lua
  * Copyright (C) 2019 Michael Fritscher <catweazle@tunipages.de>
@@ -58,6 +57,7 @@ client = {
 		paperdoll = { name = "paperdoll", open = false, left = 0, top = 0, width = 267, height = 487 }
 	}
 }
+
 scene = {
 	name = "none",
 	maxPlayer = 0,
@@ -67,6 +67,7 @@ scene = {
 	timeToLoad = 0,
 	timeStarted = 0,
 }
+
 player = {
 	caption = "",
 	name = "none",
@@ -103,6 +104,7 @@ player = {
 		return ret
 	end,
 }
+
 ui = {
 	version = "0.5.d",
 
@@ -480,8 +482,8 @@ setmetatable(ui.texture, {__index = ui.guiObject})
 setmetatable(ui.guiButton, {__index = ui.guiObject})
 
 
-
 -- internal
+
 ui_initialized = false
 ui_client_ts = os.time()
 ui_client_frame = 0
@@ -509,6 +511,7 @@ local function ui_getPlayerName()
 		ui.handler.invoke("_playerChanged", "caption")
 	end
 end
+
 local function ui_getPlayerChange()
 	local loc = { x = ShroudPlayerX, y = ShroudPlayerY, z = ShroudPlayerZ, scene = scene }
 	local isMoving = loc.x ~= player.location.x or loc.y ~= player.location.y or loc.z ~= player.location.z
@@ -549,6 +552,7 @@ local function ui_getPlayerChange()
 	player.health = health
 	player.focus = focus
 end
+
 local function ui_getPlayerInventory()
 	local inventory = ShroudGetInventory()
 	local ret1 = {}
@@ -609,6 +613,7 @@ local function ui_getSceneName()
 		ui.handler.invoke("_sceneChanged")
 	end
 end
+
 local function ui_initialize()
 
 	client.api.luaPath = ShroudLuaPath
@@ -637,6 +642,7 @@ local function ui_initialize()
 	ShroudRegisterPeriodic("ui_timer_internal", "ui_timer_internal", 0.01, true)
 	ShroudRegisterPeriodic("ui_timer_user", "ui_timer_user", 0.120, true)
 end
+
 local function ui_buildDrawList()
 	local list = ui_guiObjectList
 	local ds = {}
@@ -678,12 +684,11 @@ local function ui_queue(callback, ...)
 end
 
 
--- shroud callbacks
-
-
 -- shroud timers
+
 local ui_timer_ts_fast = os.time()
 local ui_timer_ts_slow = os.time()
+
 function ui_timer_internal()
 	local ts = os.time()
 
@@ -716,6 +721,7 @@ function ui_timer_internal()
 	-- watch character sheet window (realtime)
 
 	local wo = ShroudIsCharacterSheetActive()
+  
 	if wo then
 		local wx, wy = ShroudGetCharacterSheetPosition(); wx = wx - 860 -- bug
 		if wx ~= client.window.paperdoll.left or wy ~= client.window.paperdoll.top then
@@ -723,6 +729,7 @@ function ui_timer_internal()
 			ui.handler.invoke("_clientWindow", "moved", client.window.paperdoll)
 		end
 	end
+  
 	if wo ~= client.window.paperdoll.open then
 		client.window.paperdoll.open = wo
 		if wo then
@@ -758,20 +765,108 @@ end
 
 -- shroud callbacks
 
+local button_ts = {} -- howto: clean up
+local button_ts2 = {}
+
+function ShroudOnConsoleInput(channel, sender, message)
+	ui_queue(function(...)
+		-- handle player flag changes
+		if (channel == "Story" or channel == "System") and message:find("PvP") then
+      ui_getPlayerName()
+    end
+
+		-- parse message
+		local src, dst, msg = message:match("^(.-) to (.-) %[.-:%s*(.*)$")
+		if sender == "" then
+      sender = src
+    end
+    
+		if sender == "" then
+      sender = player.name
+    end
+    
+		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
+			local cmd, tail = msg:match("^[\\_!](%w+)%s*(.*)$")
+			local source = {
+				channel = channel,
+				sender = sender,
+				receiver = dst,
+			}
+      
+			if ui.command.list[cmd] then
+				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
+            and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
+            and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
+            then
+					local arg = {}
+					for a in tail:gmatch("%S+") do
+            arg[#arg + 1] = a
+          end
+          
+					arg.n = #arg
+					ui.command.list[cmd].callback(source, unpack(arg))
+				end
+			else
+				ui.handler.invoke("_consoleCommand", source, cmd, tail)
+			end
+		else
+			ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
+		end
+	end, channel, sender, message)
+end
+
+function ShroudOnGUI()
+	local ts = os.time()
+	local isHitching = ts - ui_client_ts >= 2
+	local isLoading = ts - ui_client_ts >= 5
+
+	if isHitching and client.isHitching ~= isHitching then
+		client.isHitching = isHitching
+		ui.handler.invoke("_clientIsHitching")
+	end
+  
+	if isLoading and client.isLoading ~= isLoading then
+		client.isLoading = isLoading
+		ui.handler.invoke("_clientIsLoading")
+	end
+
+	if not isHitching then
+		local list = ui_drawInScene
+		if isLoading then list = ui_drawInLoadScreen end
+
+		for _,o in next, list do
+			--[[if o.caption then
+				ShroudGUILabel(o.rect.left, o.rect.top, o.rect.width, o.rect.height, o.caption)
+			elseif o.texture then
+				ShroudDrawTexture()
+			else
+				ShroudButton()
+			end]]
+			--ui.label.draw(o)
+			o:guiDrawFunc()
+			--if os.time() - ts > 0.01 then print("gui bail out"); break end
+			if os.time() - ts > 0.01 then
+        break
+      end
+		end
+	end
+end
+
 function ShroudOnStart()
 	ShroudUseLuaConsoleForPrint(true)
 	ShroudConsoleLog(_G._MOONSHARP.banner)
 	ShroudConsoleLog("LUA Version: ".._G._MOONSHARP.luacompat)
 end
 
-local button_ts = {} -- howto: clean up
-local button_ts2 = {}
 function ShroudOnUpdate()
 	local ts = os.time()
 
 	-- init
 	if not ui_initialized then
-		if not ShroudServerTime then return end -- shroud Api not ready, yet
+		if not ShroudServerTime then
+      return
+    end -- shroud Api not ready, yet
+    
 		ShroudConsoleLog("Shroud Api Ready. ServerTime: "..ShroudServerTime)
 
 		ui_initialize()
@@ -790,6 +885,7 @@ function ShroudOnUpdate()
 			client.isLoading = false
 			scene.timeToLoad = client.accuracy
 		end
+    
 		client.timeInGame = ShroudTime
 		client.timeDelta =  ShroudDeltaTime
 		client.fps = ui_client_frame
@@ -808,10 +904,14 @@ function ShroudOnUpdate()
 				for _,kd in next, f.keysHeld do
 					invoke = invoke and ShroudGetKeyDown(kd)
 				end
-				if invoke then f.callback() end
+        
+				if invoke then
+          f.callback()
+        end
 			end
 		end
 	end
+  
 	-- check key held/repeat
 	for ku,r in next, ui.shortcut.list.watch do
 		if ShroudGetOnKeyDown(ku) then
@@ -820,31 +920,32 @@ function ShroudOnUpdate()
 				for _,kd in next, f.keysHeld do
 					invoke = invoke and ShroudGetKeyDown(kd)
 				end
+        
 				if invoke then
 					f.timeDown = os.time()
 					f.callback("down", ku, f.keysHeld)
 				end
 			end
-
 		elseif ShroudGetKeyDown(ku) then
 			for _,f in next, r do
 				local invoke = true
 				for _,kd in next, f.keysHeld do
 					invoke = invoke and ShroudGetKeyDown(kd)
 				end
+        
 				if invoke then
 					if os.time() - f.timeDown >= 0.25 then
 						f.callback("held", ku, f.keysHeld)
 					end
 				end
 			end
-
 		elseif ShroudGetOnKeyUp(ku) then
 			for _,f in next, r do
 				local invoke = true
 				for _,kd in next, f.keysHeld do
 					invoke = invoke and ShroudGetKeyDown(kd)
 				end
+        
 				if invoke then
 					f.timeUp = os.time()
 					f.callback("up", ku, f.keysHeld)
@@ -879,14 +980,15 @@ function ShroudOnUpdate()
 			end
 		end
 	end
+  
 	if client.mouse.x ~= ShroudMouseX or client.mouse.y ~= ShroudMouseY then
 		client.mouse.x, client.mouse.y = ShroudMouseX, ShroudMouseY
 		ui.handler.invoke("_mouseMove", client.mouse.button, client.mouse.x, client.mouse.y)
 	end
+  
 	for i,mb in next, client.mouse.button do
 		ui.handler.invoke("_mouseButton", mb, i, client.mouse.x, client.mouse.y)
 	end
-
 
 	ui.handler.invoke("_update")
 
@@ -895,76 +997,3 @@ function ShroudOnUpdate()
 		ui_buildDrawList()
 	end
 end
-
-function ShroudOnGUI()
-	local ts = os.time()
-	local isHitching = ts - ui_client_ts >= 2
-	local isLoading = ts - ui_client_ts >= 5
-
-	if isHitching and client.isHitching ~= isHitching then
-		client.isHitching = isHitching
-		ui.handler.invoke("_clientIsHitching")
-	end
-	if isLoading and client.isLoading ~= isLoading then
-		client.isLoading = isLoading
-		ui.handler.invoke("_clientIsLoading")
-	end
-
-	if not isHitching then
-		local list = ui_drawInScene
-		if isLoading then list = ui_drawInLoadScreen end
-
-		for _,o in next, list do
-			--[[if o.caption then
-				ShroudGUILabel(o.rect.left, o.rect.top, o.rect.width, o.rect.height, o.caption)
-			elseif o.texture then
-				ShroudDrawTexture()
-			else
-				ShroudButton()
-			end]]
-			--ui.label.draw(o)
-			o:guiDrawFunc()
-			--if os.time() - ts > 0.01 then print("gui bail out"); break end
-			if os.time() - ts > 0.01 then break end
-		end
-	end
-end
-
-function ShroudOnConsoleInput(channel, sender, message)
-
-	ui_queue(function(...)
-
-		-- handle player flag changes
-		if (channel == "Story" or channel == "System") and message:find("PvP") then ui_getPlayerName() end
-
-		-- parse message
-		local src, dst, msg = message:match("^(.-) to (.-) %[.-:%s*(.*)$")
-		if sender == "" then sender = src end
-		if sender == "" then sender = player.name end
-		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
-			local cmd, tail = msg:match("^[\\_!](%w+)%s*(.*)$")
-			local source = {
-				channel = channel,
-				sender = sender,
-				receiver = dst,
-			}
-			if ui.command.list[cmd] then
-				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
-				and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
-				and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
-				then
-					local arg = {}
-					for a in tail:gmatch("%S+") do arg[#arg + 1] = a end
-					arg.n = #arg
-					ui.command.list[cmd].callback(source, unpack(arg))
-				end
-			else
-				ui.handler.invoke("_consoleCommand", source, cmd, tail)
-			end
-		else
-			ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
-		end
-
-	end, channel, sender, message)
-end
-

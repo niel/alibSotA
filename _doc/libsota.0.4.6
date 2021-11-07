@@ -1,0 +1,85 @@
+    Added the ShroudButton and did some optimizations, testing and bugfixes. Improved z ordering. That changed also the object model somewhat. This is also the preview of libsota.0.5.0 (will come with libsota.ui).
+    Removed window and wdm. They are not working anymore and where quick and dirty. If chris does not add a bunch of new functions to the Shroud Api i continue with libsota.ui, so that window and a wdm will be available again.
+
+    libsota.util is adjusted to the new model. The functions in libsota.util should continue to work.
+
+    if you use string.style to set fontsize (string:style{ size = nn }) it should now be the same size at different resolutions. No more to small fonts at 4k monitors. Thx @Toular for the hint/tip to get this done.
+
+    All drawing elements (ShroudGuiLabel / ui.label, ShroudDrawTexture / ui.texture, ShroudButton / ui.guiButton and ShroudButtonRepeat / ui.guiButton) are now derived from guiObject.
+    As of this they share the same methods:
+
+    for ui.label, ui.texture, ui.guiButton:
+    ui.guiObject.add(left, top, with, height, drawFunc) - adds a guiObject (this function is considered private to the lib)
+
+    ui.guiObject.remove(object) | object:remove() - removes the object
+    ui.guiObject.shownInScene(object, bool) | object:shownInScene(bool) - sets or gets if the object is shown while in scene
+    ui.guiObject.shownInLoadingScreen(object, bool) | object:shownInLoading(bool) - sets or gets if the object is shown on loading screen
+    ui.guiObject.visible(object, bool) | object:visible(bool) - sets or gets if the object is shown at all
+    ui.guiObject.zIndex(object, number) | object:zIndex(number) - sets or gets the objects z-index.
+    ui.guiObject.toggle(object) | object:toggle() - toggles the visible state of the object
+    ui.guiObject.moveTo(object, x, y) | object:moveTo(x, y) - move the object to the given position
+    ui.guiObject.moveBy(object, x, y) | object:moveBy(x, y) - move the object by the values (delta)
+    ui.guiObject.resizeTo(object, w, h) | object:resizeTo(w, h) - resizes the object to the given size
+    ui.guiObject.resizeBy(object, w, h) | object:resizeBy(w, h) - resizes the object by the given size (delta)
+    ui.guiObject.rect(object, rect) | object:rect(rect) - sets or gets the rect of the object. One can also use ui.guiObject.rect({ left = 10, width = 20 }) to only change this values from a rect. object:rect(rect) is currently buggy
+
+    the object:rect() can also be used with the rect functions from libsota.util
+    The ui.guObject is not directly used. Since gui objects are now derived from this class the methods are accessible directly from the object:
+
+    label = ui.label.add(0, 0, 5, 5, "caption")
+    label:moveTo(10, 10)
+    label:resizeTo(20, 20)
+    label:visible(true)
+    texture = ui.texture.add(10, 10, "test.png")
+    texture:zIndex(-10)
+    texture:toggle()
+    button = ui.guiButton.add(80, 80, texture, "caption", "tooltip", 80, 80)
+    button:visible(true)
+    button: onClick(function(x, y) ui.consolePrint(string.format("x: %d, y: %d", x, y)) end)
+
+
+    label = ui.label.add(left, top, width, height, caption) - adds a label and returns the label object
+    label.caption = string: the caption of the label
+
+    texture = ui.texture.add(left, top, filename, clamped, scaleMode, width, height) - adds a texture instance, loads texture if not already loaded. returns a texture object. when width or height arr omitted with or height are taken from image
+    texture = ui.texture.clone(texture) | texture = texture:clone() - clones the texture instance and returns the new instance
+    bool = ui.texture.clamp(texture, clamped) | bool = texture:clamp(clamped) - clamps the the underlying texture, so the texture is clamped for all instances that use this image. returns if texture is clamped
+    ui.texture.scaleMode(texture, scaleMode) | texture:scaleMode(scaleMode) - sets or gets the scaleMode for this instance. (ScaleModes are: StretchToFill, ScaleAndCrop or ScaleToFit)
+
+    button = ui.guiButton.add(left, top, texture, caption, tooltip, width, height) - adds a button. texture is a texture instance. returns the button object.
+    ui.guiButton.onClick(button, callback) | button: onClick(callback) - will call the callback when the button is clicked. the callback is callback(x, y). x and y contains the child position of the click (left, top of the button is 0,0)
+    ui.guiButton.onRepeat(button, callback) | button: onRepeat(callback) - will call the callback when the button is pressed and as long/often it is pressed. callback is callback(x,y). x and y are child coordinates (0,0 is left,top of the button)
+    button.tooltip = string: the tooltip of the button
+    button.caption = string: the caption of the button
+    button.texture = texture: the texture instance used. (can also be used to change the image on the button)
+
+    Atos example regarding the buttons, converted to libsota:
+    Code:
+
+    function ShroudOnStart()
+
+        ui.onInit(function()
+          tex = ui.texture.add(0, 0, "test.png")
+
+          btn = ui.guiButton.add(150, 150, tex, "", "tooltip", 80, 80)
+          btn:onRepeat(function(x, y)
+             ui.consoleLog(string.format("screen: %d %d, child: %d %d", client.mouse.x, client.mouse.y, x, y))
+          end)
+          btn:visible(true)
+
+          tex:moveTo(300, 300)
+          tex:visible(true)
+        end)
+
+
+    end
+
+    -- implement Shroud calls
+    function ShroudOnConsoleInput() end
+    function ShroudOnGUI() end
+    function ShroudOnUpdate() end
+
+     
+
+Last edited: Thursday at 3:10 AM
+

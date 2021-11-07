@@ -1,0 +1,41 @@
+    If guiButton is used with a invalid texture object it will now give you a error message on the console. ui.guiButton.add will return nil in this case. ShroudButton does not draw a button without a texture.
+    ui.texture.add will now return nil instead of the return code from ShroudLoadTexture in the case a texture can not be loaded
+
+    ui.timer - improved the handling of userdata. ui.SetInterval and ui.SetTimout can now also be used with userdata
+    ui.onConsoleLog, ui.onConsoleCommand and command invokation - now uses a faster queue
+
+    fixed: client.isHitching may not return to false
+
+    libsota.0.4.6 and the patch file are found in the folder archive
+
+    ---- libsota.util
+
+    cleaned up the code and added functions for textures
+
+    \info stat - will now search in stat.name and stat.description when no stat with the given name is found
+    \info inventory - added. Shows the players inventory on the console
+
+    \info player - does not show player.inventory. that may are a lot of entries, so i decided to hide this. Replacement is \info inventory. The players inventory is still accessed through player.inventory
+
+    --- libsota.ui
+
+    add a dev folder with libsota.0.5.d, libsota.util and libsota.ui
+    i do not progress as fast as i want with it. The folder is only there to show something is done.
+
+    The current concept is, that a application object needs to be created. All ui objects then are created trough the application object. (in the one or other way).
+    The composing of the add-on is done in app.onActivate(). Freeing objects in app.onDeactivate().
+    This allows to activate and deactivate a application/add-on. Ui objects are freed through the api.
+    Players should have the ability to de- and activate a add-on as they like. Hence the onActivate and onDeactivate events.
+
+    a command will be added \shell <appname> activate and \shell <appname> deactivate (or load / unload). May also a menu in the upper right area to allow this by clicking a menu entry.
+
+    uitest.lua shows what is currently working.
+    Linux users have to add a symlink in <datafolder> named "Lua\share" that points to Lua/share/
+    (The bug with the backslash is still present in QA 896)
+
+    --- licence
+    added LGPL licence to all libsota files
+     
+
+Last edited: Friday at 8:43 AM
+

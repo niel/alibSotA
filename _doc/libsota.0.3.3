@@ -1,0 +1,42 @@
+needs QA build 887
+I have not checked if the problem introduced in 886 still exists. You may need to add the following code to your script(s):
+Code:
+
+-- kill hooks
+function ShroudOnConsoleInput() end
+function ShroudOnGUI() end
+function ShroudOnUpdate() end
+function ShroudOnStart() end
+
+
+player.name is now retrived directly from the client
+player.flag -- returns the flag (like PVP)
+player.isPvp -- returns true when player is flagged PvP
+
+ui.consoleLog -- logs to the console supporting multiline messages (\n)
+
+ui.registerKey -- registers a function that is called when the given key(s) are pressed
+Code:
+
+-- ui.registerKey (key, key, ...., callback)
+--
+-- ui.registerKey("RightAlt", "M", function() <func body> end)
+--
+-- or
+--
+-- myFunctionInvokedByKeystroke()
+-- <func body>
+-- end
+-- ui.registerKey("LeftAlt", "M", myFunctionInvokedByKeystroke)
+--
+ui.registerKey("F", function()
+    ui.consoleLog("toggle friend list")
+end)
+
+For key names see here: https://docs.unity3d.com/ScriptReference/KeyCode.html
+
+
+ui.onConsoleInput and ui.onConsoleCommand are now called in a non blocking manner. To prevent blocking user input. Also cleaned up this handler, player.name does not need to be retrieved from console input anymore.
+
+stat.descriptions are now cached this results to fewer calls to the client. (may more important for @Chris)
+

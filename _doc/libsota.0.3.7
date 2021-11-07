@@ -1,0 +1,100 @@
+player.{x,y,z}() was removed
+player.location() now returns a table containing x,y,z and scene.
+
+onGui has now a execution time restriction. That should prevent "lagging" if to many labels are shown. How much "to many" means depends on your machine. On a slow machine (Dual Core E6600 @2.4 GHz with 8GByte Memory and a Radeon HD 5870 with 1GByte Memory) "to many" are 250 labels, a healthy amount is 150 labels.
+Anyway, i think 150 labels are more then enough. Many scripts already made using less then 10 labels.
+
+The testing.lua example contains a "benchmark" you can comment in the code and see yourself how many labels can be drawn on your machine.
+If you use the benchmark and find out that it is to laggy, the execution time allowed can be more restricted. Please tell me.
+
+testing.lua:
+\xp shows your pooled xp in the chat window
+\stat <number or name> shows the stat you ask for in console
+\keys shows wich keyStrokes are bound to a function
+keyStroke: "RightAlt + P" shows your location in the chat window.
+
+Code:
+
+function ShroudOnStart()
+
+
+ui.onInit(function()
+
+    local id = ui.label.create(30,24,1024,24, "Init")
+    ui.label[id].visible = true
+    setInterval(1, function()
+        ui.label[id].text = string.format("%d | %s | %s | %s | %f | %f | %f", client.fps, scene.name, player.name, player.flag, client.timeInGame / 60, scene.timeInScene / 60, scene.timeToLoad)
+    end)
+  
+    local id2 = ui.label.create(30,24,1024,24, "Lade Szene bitte warten...")
+    ui.label[id2].shownInLoadScreen = true
+    ui.label[id2].shownInScene = false
+    ui.label[id2].visible = true
+  
+    ConsoleLog("on init in testing")
+  
+    -- benchmark
+    --[[
+    local x=0
+    local y=0
+    local dx=10
+    local dy=10
+    for i=1,1024 do
+        if x + dx > client.screen.width or x + dx < 0 then dx = -dx end
+        if y + dy > client.screen.height or y + dy < 0 then dy = -dy end
+        x = x + dx
+        y = y + dy
+        showLabel(createLabel(x, y, 256, 256, "Label "..i))
+    end]]
+end)
+
+ui.onConsoleInput(function(type, src, dst, msg)
+    ui.consoleLog(type .. "|" .. src .. "|" .. dst .. "|" .. msg)
+end)
+
+ui.onConsoleCommand(function(cmd, src, dst, arg)
+        ShroudConsoleLog(cmd .. "|" .. src .. "|" .. dst .. "|" .. arg)
+        ShroudConsoleLog(string.format("Player: %s Flag: %s, PvP: %s", player.name, player.flag, tostring(player.isPvp)))
+          
+    if cmd == "stat" then
+        local stat = player.stat(arg)
+        ui.consoleLog(string.format("Stat: %d, %s, %s, %s", stat.number, stat.name, stat.value, stat.description))
+      
+    elseif cmd == "xp" then
+        local stat = player.xp()
+        ui.consoleLog(string.format("XP: Abenteurer: %s, Handwerker: %s", stat.adventurer, stat.producer))
+      
+    elseif cmd == "keys" then
+        local keyStroke=""
+        for k,r in next, client._keyStrokes do
+            keyStroke = ""
+            for _,t in next, r do
+                for _,p in next, t.key do
+                    keyStroke = p.." + "..keyStroke
+                end
+            end
+            ui.consoleLog(keyStroke..k)
+        end
+      
+    end
+
+end)
+
+ui.registerKey("RightAlt", "P", function()
+    local loc = player.location()
+
+    ui.consoleLog(string.format("Position: %s: %d, %d, %d", loc.scene, loc.x, loc.y, loc.z))  
+end)
+
+
+
+
+end -- ShroudOnStart
+
+-- kill hooks
+function ShroudOnConsoleInput() end
+function ShroudOnGUI() end
+function ShroudOnUpdate() end
+[/SPOLER]
+
+

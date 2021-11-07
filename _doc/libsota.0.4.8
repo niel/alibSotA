@@ -1,0 +1,61 @@
+    added ui.module
+
+    ui.module.add(modulename, prefix) - loads a module from file and returns the compiled version of it. if prefix is given the module will be added to the global namespace
+    ui.module.get(modulename) - returns the compiled version from the module, nil if it does not exists
+    ui.module.remove(modulename) - removes a modules
+    ui.module.invoke(modulename, function, ...) - calls a function within the module code with parameters given (...). If function is omitted the module is called as a function.
+
+    --- libsota.util
+    load - points to loadsafe
+    loadstring - points to loadsafe
+    loadfile - points to ui.module.add. (loadfile mimics loadfile from LUA)
+    dofile(filename) - loads a file and runs it. Returns the result (mimics dofile from LUA)
+    require(modulename, ignoreErrors) - loads a file and runs it. (mimics require from LUA)
+    include(modulename) - loads a file and runs it, but ignore errors. Like require but script(s) are not stopped in case of an error
+    module - loads a file and adds it to the global namespace (this does not! work like module from LUA)
+
+    ----
+
+    Modules are searched in lib/, share/, bin/ and include/ within the <ShroudLuaPath>. When not found an error message is shown on the console. Modulenames can be given as "mod\\filename", "mod/filename.lua", "mod.filename", etc. The final modulename is always divided with dots without the lua extension. So, ui.module.add("mod\\filename.lua") will result in this modulename: mod.filename. All ui.module functions accept any of \, / or . as divider. ui.module.add("mod.filename.lua") will also load the file when it exists.
+    ui.module caches loaded files, so they are only loaded once (and compiled once).
+
+    ui.module.get or ui.module.add can be used to assign the module to a variable:
+    local mod = ui.module.add(mod.locals) - loads the module mod/locals.lua and assign it to the local variable mod. If the module is a function, the function can be called with mod().
+    mod = ui.module.add(mod.globlas) - loads the module and assign it to the global variable mod. All scripts can access the module with mod() or mod.index (depending of if it is a table or a function)
+
+    ui.module.add also supports a prefix. If a prefix is given the module code is added to the global namespace with the name prefix. If the prefix contain dots (or / or \\) a table is created with the deepest element as the module code.
+    ui.module.add("mod/subdir/filename.ext", "mod") - loads the module and adds its code as mod in the global namespace. The code is access able from all scripts via mod()
+    ui.module.add("mod/subdir/filename.ext", "mod.globals") - loads the module and adds its code to the table mod as the index globals. The code is access able for all scripts via mod.globals()
+    ui.module.add("mod/subdir/filename.ext", "mod.special") - loads the module and adds its code to the table mod as index special. If the line before was also used both modules are in the table mod and access able via mod.globals() and mod.special()
+
+    mytable = {
+    x = somevalue,
+    y = somefunction(),
+    }
+    ui.module.add("filename.ext", "mytable.z") - loads the module code into the table mytable as z. So, one can do mytable.y() or mytable.z()
+    Another way is:
+    mytable = {
+    x = somevalue,
+    y = somefunction(),
+    z = ui.module.add("filename.ext")
+    }
+
+    The prefix can also be true or "". In this case the modulename is used as prefix.
+
+    ui.module.remove(modulname) - removes the module from memory. and from all prefixes that where used with this module. It cannot remove modules that are assigned to a variable. Like local myvar = ui.module.add or myvar = ui.module.add.
+
+    ui.module.invoke(modulename, function, ...) - calls the module code, even it is neither assigned to a variable or to a prefix.
+    ui.module.get(modulename) - may be used to assign the module code to a variable at a later time. might it be a local or global variable.
+
+    loadsafe works similar to load from LUA 5.3 but is compatible to loadstring from LUA 5.2. loadsafe does not use the global env as its default, like the LUA functions
+    loadfile loads a file and returns its code. ui.module.add is similar to this (when prefix is not used)
+    dofile - loads a file and runs it. Returns the result. The same is in LUA
+    require - loads a file and runs it. (no return). The same as in LUA. If the file can not be loaded all scripts are halted and a errormessage is shown on the console. It also do not run code more then once.
+    include - calls require with ignoreError = true. No errors are shown (except the ones coming from ui.module.add). Scripts are not halted in the case of an error.
+    module - calls ui.module.add with prefix = true. The module is added to the global namespace with its name.
+
+
+    All of this needs some testing. Feedback is welcome.
+     
+
+

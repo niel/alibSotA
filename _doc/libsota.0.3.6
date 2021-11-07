@@ -1,0 +1,34 @@
+    @Tiina Onir reported a bug, that using ShroudOnStart it to early to retrive values from Shroud-API. https://www.shroudoftheavatar.com/forum/index.php?threads/responded-lua-loads-before-player.160294
+    In libsota.0.3.6 the start sequence is changed, so when ui.onInit is invoked everything is access able.
+    Also added ui.onStart that tells you that are all scripts are loaded, but at this point you can not access all values. Use ui.onInit()
+
+    libsota should load, before all other scripts are loaded. Else you can not subscribe to one of the callbacks. But we can not control in wich order scripts are loaded, und the require function is not implmented...
+    Either name libsota.lua 1.libsota.lua so it is loaded first, or wrap ui.onInit in ShroudOnStart() like this:
+    Code:
+
+
+    -- wrap in ShroudOnStart to be sure all scripts are loaded and libsota is available
+    function ShroudOnStart()
+
+        -- subscripe to onInit event.
+        ui.onInit(function()
+
+            lblHealThySelf = ui.label.create(800, 80, 300, 100, "<color=red><size=50>Heal thy self!</size></color>")
+
+            setInterval(1, function()
+                health = player.health()
+                ui.label[lblHealThySelf].visible =  health.current / health.total < 0.5
+            end)
+
+        end)
+
+    end
+
+    -- kill hooks
+    function ShroudOnConsoleInput() end
+    function ShroudOnGUI() end
+    function ShroudOnUpdate() end
+
+     
+
+

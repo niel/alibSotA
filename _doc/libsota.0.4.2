@@ -1,0 +1,30 @@
+    Improved the init squence. A /lua reload should not be needed anymore
+
+    Changed the callback for command to callback(source, ...). source is a table containing channel, sender and receiver. The second argument is now the first argument for your command. (old was: callback(sender, receiver, ...)). The source argument can be used to check who is allowed to use the command.
+
+    ui.command.restrict(command, channel, sender, receiver) - this allows to restrict when the command is issued. Default: sender = player.name, channel = nil, receiver = nil. The default means the callback is only invoked when the player has typed the command regardless of channel or receiver. Nil or false means do not check. The restriction is only used for regsitered commands. Not regsitered command will incoke ui.onConsoleCommand without checking.
+
+    Added _ and ! as command prefix. Commands can know start with \, _, or !
+    Means it is now the players choice if the command is typed \command, _command or !command. In all three cases the regsitered command will be invoked.
+
+    Know using ShroudPeriodic for timing. That is less fps dependend.
+    Improved key handling somewhat
+
+    string client.api.luaversion - tells used lua version
+    table client.api.list - a table with available functions and globals from shroud api. That can be used to check if a function is already available in the client version the player is using.
+
+    libsota.util
+    added command:
+    \lua lua - shows lua version and path
+    \lua api - shows list of available functions and globals from shroud api
+    \info xp -- shows players pooled xp
+    \info stat <number or name> -- shows stat info and value
+    \info client -- shows client info and variable names (client object from libsota)
+    \info player -- shows player info and variable names (player object from libsota)
+    \info scene -- shows scene info and variable names (scene object from libsota)
+    \info ui -- shows the functions you can use (api) from libsota (ui object from libsota)
+    \info lib -- shows other info from libsota. incl. list of registered / added commands
+     
+
+Last edited: Nov 24, 2019
+

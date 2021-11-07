@@ -1,0 +1,73 @@
+    Needs QA 888
+
+    The problem with the ShroudOn.. functions are still present in QA 888...
+    CatweazleX said: ↑
+
+        There is a problem with QA 886 regarding ShroudOn.. and ShroudRegisterPeriodic. The handlers and periodics are called more then one time. see
+        Please add the following lines to each script that is loaded by the shroud lua interpreter to avoid strange problems/behaviors and don't use ShroudRegisterPeriodic:
+        Code:
+
+        -- kill hooks
+        function ShroudOnConsoleInput() end
+        function ShroudOnGUI() end
+        function ShroudOnUpdate() end
+        function ShroudOnStart() end
+
+        You can use the handlers and timers from libsota instead, they do not have that problem.
+        Click to expand...
+
+
+    There are two new events added:
+    ui.onPlayerChange - this is invoked when the player name or player flagging changes (oracle, oracle head or entering/leaving pvp scene)
+    ui.onSceneChange - this is invoked when the player has changed the scene
+
+    labels are not shown anymore on loading screen, by default.
+
+    reworked ShroudOnConsoleInput handler so it does not block player input, or delay it. tested it with some fire dots on some mobs.
+
+    timers can now have userdata.
+    id = ui.timer.create(timeout, once, callback, ...)
+    used like this:
+    id = ui.timer.create(10, true, function(...) <func body> end, variable1, variable2, variable3)
+    The utility functions setTimeout and setInterval does not allow userdata, but that is mostly not needed
+
+
+    client.timeStarted - tells when the client was started. persist over /lua reload. os.date("%c", client.timeStarted) can be used.
+    client.timeInGame - tells how long the player is currently in game in seconds
+    client.timeDelta - 1 / timeDelta tells you the fps
+    client.fps - tells the frame rate of the lua script
+
+    scene.name - name of the scene the player is currently in
+    scene.maxPlayer - tells max number of player
+    scene.isPvp - tells if this is a pvp scene
+    scene.isPot - tells if this is a pot
+    scene.timeInScene - tells how long the player is in the current scene in seconds
+    scene.timeToLoad - tell how many seconds it tooks to load the current scene
+    scene.timeStarted - tells the timestamp when the player entered the current scene. os.date("%c", scene.timeStarted) turn the timestamp into a human readable format
+
+    player.caption - tells the caption of the playername. like it is shown in the game
+    player.name - tells the name of the player without any flags (like [PVP] ...)
+    player.flag - tell the flag string (like [AFK][PVP])
+    player.isPvp - tells if the player is flagged pvp
+    player.x() - returns x position of player
+    player.y() - returns y position of player
+    player.z() - returns z position of player
+    player.health() - returns health values: total = current max health, current = current health
+    player.focus() - returns focus values: total = current max focus, current = current focus
+    player.xp() - returns xp values: producer = producer xp, adventurer = adventurer xp
+    player.stat(index) - returns stat values: name = name of stat, number = number of stat, description = description of stat, value = value of stat. Index can be number or name of stat
+
+    labels:
+    left - x pos in pixel
+    top - y pos in pixel
+    width - width in pixel
+    height - height in pixel
+    text - string to show
+    visible - if the label is visible or not
+    shownInScene - this label is shown while in scene when visible is true
+    shownInLoadScreen - this label is shown during load screen when visible is true
+
+    ui.window is still delayed, like some other visual stuff
+     
+
+

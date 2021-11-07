@@ -1,0 +1,87 @@
+libsota.util:
+
+
+Quick and dirty windows and window manager (libsota.util):
+You can switch through the windows using LeftControl + Tab. Focused windows can be moved using LeftControl and the ArrowKeys. LeftControl + F4 hides or unhides the focused window.
+You can play a little around with that. Good luck.
+
+Here is an example script how to use:
+Code:
+
+function ShroudOnStart()
+    ui.onInit(function()
+       
+        w1 = window(100, 100, 600, 300, "testfenster")
+        w1:createLabel("test", 10, 30, "Hallo")
+        w1:visible(true)
+        w1:moveTo(250, 300)
+        wdm.add(w1)
+
+        w2 = window(150, 150, 600, 300, "testfenster")
+        w2:createLabel("test", 10, 30, "Welt")
+        w2:visible(true)
+        wdm.add(w2)
+       
+        w3 = window(350, 450, 600, 300, "testfenster")
+        w3:createLabel("test2", 10, 30, "Hallo")
+        w3:createLabel("test1", 40, 30, "Welt")
+        w3:visible(true)
+        wdm.add(w3)
+
+    end)
+end
+
+---------- hier der richtige update
+
+    Minor update. There are new things on the QA i need to check out
+
+
+    ui.label can now have a zIndex.
+
+    ----
+    libsota.util
+    windows are now resizeable using LeftAlt + ArrowKeys
+    Windows are brought to front when they get the focus.
+
+    window.moveAble - allows window to be moved by the "window manger" or not
+    window.resizeAble - allows window to be resized by the "window manager" or not
+    window:moveBy, window.moveTo - moves window (by = delta, to = absolute)
+    window:resizeBy, window.resizeTo - resizes window (by = delta, to = absolute)
+    window:visible(bool) - set window visible or not
+    window:zIndex(zIndex) - set the z-index of the window
+    window:createLabel(name, x, y, caption) - creates a label as child for that window.
+    window:createTextbox(name, x, y, w, h) - creates a label as child for that window
+    window:setCaption(name, caption) - set te caption of label that is child of that window
+    window:setText(name, caption) - set the text of label that is a child of that window
+    window:getLabel(name) - returns the index of the ui.label used
+
+
+    Code:
+
+    function ShroudOnStart()
+        ui.onInit(function()
+         
+            w1 = window(100, 100, 600, 300, "testfenster")
+            w1:createLabel("test", 10, 30, "Hallo")
+            w1:visible(true)
+            w1:moveTo(250, 300)
+            wdm.add(w1)
+
+            w2 = window(150, 150, 600, 300, "testfenster")
+            w2:createLabel("test", 10, 30, "Welt")
+            w2:visible(true)
+            wdm.add(w2)
+         
+            w3 = window(350, 450, 600, 300, "testfenster")
+            w3:createLabel("test2", 10, 30, "Fast alles über Lorem ipsum")
+            w3:createTextbox("test1", 10, 50, 580, 200)
+            w3:setText("test1", "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\nAt vero eos et accusam et justo duo dolores et ea rebum.")
+            w3:visible(true)
+            wdm.add(w3)
+        end)
+    end
+
+     
+
+Last edited: Nov 27, 2019
+

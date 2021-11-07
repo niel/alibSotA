@@ -396,9 +396,6 @@ setmetatable(rect, {__call = rect._new})
 
 
 -- implement Shroud calls
-function ShroudOnConsoleInput() end
-function ShroudOnGUI() end
-function ShroudOnUpdate() end
 function ShroudOnStart()
 	ui.onInit(function()
 		ui.command.add("lua", function(source, action)
@@ -490,4 +487,27 @@ function ShroudOnStart()
 			end
 		end)
 	end)
+end
+
+-- implement other ShroudOn... to allow other scripts
+function ShroudOnConsoleInput()
+end
+
+function ShroudOnGUI()
+end
+
+function ShroudOnLogout()
+	--client.isLoggedIn = false
+end
+
+function ShroudOnSceneLoaded(SceneName)
+	--scene.name = SceneName
+	--client.isLoggedIn = true
+end
+
+function ShroudOnSceneUnloaded()
+	--scene.name = ""
+end
+
+function ShroudOnUpdate()
 end

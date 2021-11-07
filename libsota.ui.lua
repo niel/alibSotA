@@ -34,30 +34,30 @@ ui.rect = function(left, top, width, height)
 		y2 = top + height,
 		z = 0,
 	}
-  
+
 	self.hittest = function(x, y)
 		return x > self.left and y > self.top and x < self.left + self.width and y < self.top + self.height
 	end
-  
+
 	self.pxHittest = function(x, y)
 		return x > self.x1 and y > self.y1 and x < self.x2 and y < self.y2
 	end
-  
+
 	self.moveTo = function(x, y)
 		self.left = x
 		self.top = y
 	end
-  
+
 	self.moveBy = function(dx, dy)
 		self.left = self.left + x
 		self.top = self.top + y
 	end
-  
+
 	self.resizeTo = function(w, h)
 		self.width = w
 		self.height = h
 	end
-  
+
 	self.resizeBy = function(dw, dh)
 		self.width = self.width + dw
 		self.height = self.height + dh
@@ -73,9 +73,10 @@ ui.container = {
 			rect = rect,
 		}
 		setmetatable(self, {__index = ui.container})
+
 		return self
 	end,
-  
+
 	add = function(self, name, object, left, top, width, height)
 		self.list[tostring(name)] = object
 		object.name = name
@@ -86,18 +87,19 @@ ui.container = {
 			height = height or object.rect.height,
 			z = table.maxn(self.list)
 		}
+
 		self:refresh()
 	end,
-  
+
 	get = function(name)
 		return self.list[tostring(name)]
 	end,
-  
+
 	remove = function(name)
 		self.list[tostring(name)]:remove()
 		self.list[tostring(name)] = nil
 	end,
-  
+
 	refresh = function(self)
 		for _,o in next, self.list do
 			--[[o.rect.left = self.rect.left + o.clientRect.left
@@ -109,42 +111,43 @@ ui.container = {
 			o:resizeTo(o.clientRect.width, o.clientRect.height)
 		end
 	end,
-  
+
 	zIndex = function(self, zIndex)
 		if zIndex then
-		print(zIndex)
+      print(zIndex)
 			self.rect.z = zIndex
 			for _,o in next, self.list do
 				o:zIndex(zIndex + o.clientRect.z)
 			end
 		end
+
 		return self.rect.z
 	end,
-  
+
 	visible = function(self, visible)
 		for _,o in next, self.list do
 			o:visible(visible)
 		end
 	end,
-  
+
 	moveTo = function(self, x, y)
 		self.rect.left = x
 		self.rect.top = y
 		self:refresh()
 	end,
-  
+
 	moveBy = function(self, x, y)
 		self.rect.left = self.rect.left + x
 		self.rect.top = self.rect.top + y
 		self:refresh()
 	end,
-  
+
 	resizeTo = function(self, w, h)
 		self.rect.width = w
 		self.rect.height = h
 		self:refresh()
 	end,
-  
+
 	resizeBy = function(self, w, h)
 		self.rect.width = self.rect.width + w
 		self.rect.height = self.rect.height + h
@@ -154,9 +157,10 @@ ui.container = {
 
 ui.titlebar = {
 	_new = function(self, caption, icon)
+
 		return self:new(caption, icon)
 	end,
-  
+
 	new = function(caption, icon)
 		local lbl = ui.text(caption:style({ size = 14, bold = true }))
 		local ico = ui.image(icon)
@@ -165,20 +169,23 @@ ui.titlebar = {
 		ico:zIndex(-1)
 		self:add("_caption", lbl, 32, 2, self.rect.width, 32)
 		self:add("_icon", ico, 2, 2, 24, 24)
+
 		return self
 	end,
-  
+
 	caption = function(self, caption)
 		if caption then
 			self.list["_caption"].caption = caption
 		end
+
 		return self.list["_caption"].caption
 	end,
-  
+
 	icon = function(self, icon)
 		if icon then
 			self.list["_icon"] = icon
 		end
+
 		return self.list["_icon"]
 	end,
 }
@@ -186,29 +193,33 @@ setmetatable(ui.titlebar, {__index = ui.container, __call = ui.titlebar._new})
 
 ui.button = {
 	_new = function(self, caption)
+
 		return self:new(caption)
 	end,
-  
+
 	new = function(caption)
 		local lbl = ui.text(caption:style({ size = 14, bold = true }))
 		local ico = ui.image("share/libsota/border3.png")
 		local self = ui.container.new({left=0, top=0, width=lbl.rect.width, height=32})
 		self:add("_caption", lbl, 2, 2, self.rect.width, 32)
 		self:add("_icon", ico, 0, 0, self.rect.width, 32)
+
 		return self
 	end,
-  
+
 	caption = function(self, caption)
 		if caption then
 			self.list["_caption"].caption = caption
 		end
+
 		return self.list["_caption"].caption
 	end,
-  
+
 	icon = function(self, icon)
 		if icon then
 			self.list["_icon"] = icon
 		end
+
 		return self.list["_icon"]
 	end,
 }
@@ -246,7 +257,7 @@ ui.application = {
 			self.list[#self.list + 1] = tex
 			return tex
 		end
-    
+
 		ui.texture.add = self.texture
 		ui.image = function(filename, scaleMode)
 			return ui_tex(0, 0, filename, true, scaleMode)
@@ -256,24 +267,26 @@ ui.application = {
 		self.label = function(left, top, width, height, caption)
 			local lbl = ui_label(left, top, width, height, caption)
 			self.list[#self.list + 1] = lbl
+
 			return lbl
 		end
-    
+
 		ui.label.add = self.label
 		ui.text = function(text)
 			local r = text:rect()
+
 			return ui.label.add(r.left, r.top, r.width, r.height, text)
 		end
 
 		return ui.shell.list[tostring(name)]
 	end,
-  
+
 	remove = function(self)
 		for _,o in next, self.list do
 			o:remove()
 		end
 	end,
-  
+
 	createWindow = function(self, name, rect)
 		self.list[tostring(name)] = {
 			typeName = "window",
@@ -286,8 +299,10 @@ ui.application = {
 			onMouseEnter = nil,
 			onMouseLeave = nil,
 		}
+
 		rect.z = table.maxn(self.list) * 10
 		setmetatable(self.list[tostring(name)], {__index = ui.window})
+
 		return self.list[tostring(name)]
 	end,
 }
@@ -301,22 +316,26 @@ ui.shell = {
 		local app = ui.shell.list[tostring(name)]
 		if app and app.onActivate then app.onActivate() end
 	end,
-  
+
 	deactivate = function(name)
 		local app = ui.shell.list[tostring(name)]
 		if app then
-			if app.onDeactivate then app.onDeactivate() end
+			if app.onDeactivate then 
+        app.onDeactivate()
+      end
+
 			for _,o in app.list do
 				o:remove()
 			end
 		end
 	end,
-  
+
 	onMouseMove = function(button, x, y)
 		if ui.shell.hover and not ui.shell.hover.object.rect.hittest(x, y) then
 			if ui.shell.hover.object.onMouseLeave then ui.shell.hover.object.onMouseLeave() end
 			ui.shell.hover = nil
 		end
+
 		for _,a in next, ui.shell.list do
 			for _,o in next, a.list do
 				if o.typeName == "window" then
@@ -327,15 +346,21 @@ ui.shell = {
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
 							}
-							if o.onMouseEnter then o.onMouseEnter() end
+
+							if o.onMouseEnter then
+                o.onMouseEnter()
+              end
 						end
-						if o.onMouseMove then o.onMouseMove(button, x - o.rect.left, y - o.rect.top) end
+
+						if o.onMouseMove then
+              o.onMouseMove(button, x - o.rect.left, y - o.rect.top)
+            end
 					end
 				end
 			end
 		end
 	end,
-  
+
 	onMouseButton = function(state, button, x, y)
 		if ui.shell.draging and state == "held" and button == 1 then
 			local f = ui.shell.draging
@@ -355,8 +380,10 @@ ui.shell = {
 									_x = x - o.rect.left,
 									_y = y - o.rect.top,
 								}
+
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
 							end
+
 							if o ~= ui.shell.active.object then
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() - 100)
 								ui.shell.active = {
@@ -364,21 +391,26 @@ ui.shell = {
 									_x = x - o.rect.left,
 									_y = y - o.rect.top,
 								}
+
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
 							end
+
 							ui.shell.draging = {
 								object = o,
 								_x = x - o.rect.left,
-								_y = y - o.rect.top,							
+								_y = y - o.rect.top,
 							}
 						end
-						if o.onMouseButton then	o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top) end
+
+						if o.onMouseButton then
+              o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top)
+            end
 					end
 				end
 			end
 		end
 	end,
-  
+
 	onStart = function()
 		for _,a in next, ui.shell.list do
 			if a.onActivate then a.onActivate() end
@@ -415,6 +447,18 @@ end
 function ShroudOnGUI()
 end
 
-function ShroudOnUpdate()
+function ShroudOnLogout()
+	--client.isLoggedIn = false
 end
 
+function ShroudOnSceneLoaded(SceneName)
+	--scene.name = SceneName
+	--client.isLoggedIn = true
+end
+
+function ShroudOnSceneUnloaded()
+	--scene.name = ""
+end
+
+function ShroudOnUpdate()
+end

@@ -59,6 +59,7 @@ end
 
 function toggleTimer(index)
 	ui.timer.list[index].enabled = not ui.timer.list[index].enabled
+
 	return ui.timer.list[index].enabled
 end
 
@@ -71,6 +72,7 @@ end
 
 function createLabel(left, top, width, height, caption)
 	local r = rect(left, top, width, height)
+
 	return ui.label.add(r.left, r.top, r.width, r.height, caption)
 end
 
@@ -79,6 +81,7 @@ function createLabelWithShadow(left, top, width, height, caption)
 	local s = ui.label.add(r.left+1, r.top+1, r.width, r.height, caption)
 	local l = ui.label.add(r.left, r.top, r.width, r.height, caption)
 	l.shadow = s
+
 	return l
 end
 
@@ -95,6 +98,7 @@ function setLabelCaption(label, caption)
 		local c = caption:gsub("<color=.->", "<color=black>")
 		label.shadow.caption = "<color=black>"..c.."</color>"
 	end
+
 	label.caption = caption
 end
 
@@ -102,6 +106,7 @@ function removeLabel(label)
 	if label.shadow then
 		label.shadow:remove()
 	end
+
 	label:remove()
 end
 
@@ -125,6 +130,7 @@ function setLabelVisible(label, visible)
 	if label.shadow then
 		label.shadow:visible(visible)
 	end
+
 	label:visible(visible)
 end
 
@@ -264,7 +270,7 @@ function ui.onShortcut(...)
 	return ui.shortcut.add("watch", ...)
 end
 
-ui.registerKey = ui.onShortcutPress -- depricated: ui.registerKey is about to be removed]]
+ui.registerKey = ui.onShortcutPress -- deprecated: ui.registerKey is about to be removed]]
 
 ui.onCommand = ui.command.add
 
@@ -272,20 +278,40 @@ ui.onCommand = ui.command.add
 -- compat functions libsota.0.4.x
 -- moves to libsota.ui
 string.style = function(string, style)
-	if style.bold then string = "<b>"..string.."</b>" end
-	if style.italic then string = "<i>"..string.."</i>" end
-	if style.color and #style.color > 3 then string = "<color="..style.color..">"..string.."</color>" end
-	if style.size then string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>" end
+	if style.bold then
+    string = "<b>"..string.."</b>"
+  end
+
+	if style.italic then
+    string = "<i>"..string.."</i>"
+  end
+
+	if style.color and #style.color > 3 then
+    string = "<color="..style.color..">"..string.."</color>"
+  end
+  
+	if style.size then
+    string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>"
+  end
+
 	return string
 end
 
 string.rect = function(string)
 	local str = string:gsub("<[^>]*>", "")
 	local s = tonumber(string:match("<size=(%d-)>"))
-	if not s then s = math.floor(12 * client.screen.pxptRatio + 0.5) end
+
+	if not s then
+    s = math.floor(12 * client.screen.pxptRatio + 0.5)
+  end
+
 	local mul = 0.9
-	if string:contains("<b>") or string:contains("<i>") then mul = 1 end
-	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) * mul, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proptional letters
+
+	if string:contains("<b>") or string:contains("<i>") then
+    mul = 1
+  end
+
+	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) * mul, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proportional letters
 end
 
 table.maxn = function(self)
@@ -293,6 +319,7 @@ table.maxn = function(self)
 	for _ in next, self do
 		n = n + 1
 	end
+
 	return n
 end
 
@@ -328,6 +355,7 @@ rect = {
 			r.left = (client.screen.width - r.width) / 2
 		elseif tonumber(left) == nil then
 			left = tonumber(string.match(left, "^%d+"))
+
 			if left < 0 then
 				r.left = client.screen.width - (client.screen.width / 100 * -left) - r.width
 			else
@@ -347,34 +375,45 @@ rect = {
 		end
 
 		setmetatable(r, {__index = rect})
+
 		return r
 	end,
 
 	fromString = string.style,
 
 	moveTo = function(rect, x, y)
-		if not x then x = (client.screen.width - rect.width) / 2 end
-		if not y then y = (client.screen.height - rect.height) / 2 end
+		if not x then 
+      x = (client.screen.width - rect.width) / 2
+    end
+
+		if not y then
+      y = (client.screen.height - rect.height) / 2
+    end
+
 		rect.left = x
 		rect.top = y
+
 		return rect
 	end,
 
 	moveBy = function(rect, x, y)
 		rect.left = rect.left + x
 		rect.top = rect.top + y
+
 		return rect
 	end,
 
 	resizeTo = function(rect, w, h)
 		rect.width = w
 		rect.height = h
+
 		return rect
 	end,
 
 	resizeBy = function(rect, w, h)
 		rect.width = rect.width + w
 		rect.height = rect.height + h
+
 		return rect
 	end,
 }
@@ -402,11 +441,13 @@ function ShroudOnStart()
 				ui.consoleLog("Adventurer pooled XP: "..player.xp.adventurer.."\nProducer pooled XP: "..player.xp.producer)
 			elseif action == "stat" and param then
 				local stat = player.stat(param)
+
 				if stat.value ~= -999 then
 					ui.consoleLog(string.format("Stat %d: %s = %s (%s)", stat.number, stat.name, stat.value, stat.description))
 				elseif tonumber(param) == nil then
 					for i=0,#client._statEnum do
 						stat = player.stat(i)
+
 						if string.find(stat.name:lower()..stat.description:lower(), param:lower()) then
 							ui.consoleLog(string.format("Stat %d: %s = %s (%s)", stat.number, stat.name, stat.value, stat.description))
 						end
@@ -420,11 +461,13 @@ function ShroudOnStart()
               ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
             elseif i.maxDurability > 0 then
               local c = "73d216"
+
               if i.durability < 1 then
                 c = "cc0000"
               elseif i.durability / i.maxDurability < 0.25 then
                 c = "edd400"
               end
+
               ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
             else
               ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
@@ -447,6 +490,7 @@ function ShroudOnStart()
 				end
 			elseif action == "lib" then
 				ui.consoleLog(string.format("timer: %d\nhandler: %d\ngui objects: %d", #ui.timer.list, #ui.handler.list, #ui_guiObjectList))
+
 				for _,t in next, ui.texture._loaded do
 					ui.consoleLog(string.format("texture %d: %s (%d x %d)", t.id, t.filename, t.width, t.height))
 				end
@@ -458,9 +502,11 @@ function ShroudOnStart()
 				for k,r in next, ui.shortcut.list.pressed do
 					for _,t in next, r do
 						local s = k
+
 						for _,p in next, t.keysHeld do
 							s = p.." + "..s
 						end
+
 						ui.consoleLog("shortcut pressed: "..s)
 					end
 				end
@@ -471,6 +517,7 @@ function ShroudOnStart()
 						for _,p in next, t.keysHeld do
 							s = p.." + "..s
 						end
+
 						ui.consoleLog("shortcut watched: "..s)
 					end
 				end
@@ -486,6 +533,19 @@ function ShroudOnConsoleInput()
 end
 
 function ShroudOnGUI()
+end
+
+function ShroudOnLogout()
+	--client.isLoggedIn = false
+end
+
+function ShroudOnSceneLoaded(SceneName)
+	--scene.name = SceneName
+	--client.isLoggedIn = true
+end
+
+function ShroudOnSceneUnloaded()
+	--scene.name = ""
 end
 
 function ShroudOnUpdate()

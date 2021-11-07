@@ -1,6 +1,6 @@
 -- libsota.util by Catweazle Waldschrath
 -- helper functions for global namespace to work with the ui.objects
--- depends on libsota.0.4.x
+-- depends on libsota.0.5.x
 
 
 --[[
@@ -28,7 +28,6 @@
 --- credits
 -- that_shawn_guy - string.rect (from his offsetCenter)
 -- Toular - for helping me to find a font size multiplier that helps with fontsize at different resolutions.
--- devilcult - for his dorequire. That made ui.module, and the utility functions therefor possible
 
 
 
@@ -94,7 +93,6 @@ end
 function getLabelCaption(label)
 	return label.caption
 end
-getLabelText = getLabelCaption -- depricated
 
 function setLabelCaption(label, caption)
 	if label.shadow then
@@ -103,7 +101,6 @@ function setLabelCaption(label, caption)
 	end
 	label.caption = caption
 end
-setLabelText = setLabelCaption -- depricated
 
 function removeLabel(label)
 	if label.shadow then
@@ -258,31 +255,6 @@ function moveTextureOffsetCenter(texture, x, y)
 end
 
 
--- other utility functions
-load = loadsafe
-loadfile = ui.module.add
-dofile = function(modulename)
-	local f = ui.module.add(modulename)
-	if f then return f() end
-end
-require = function(modulename, ignoreError)
-	local f = ui.module.get(modulename)
-	if f then return end
-	f = ui.module.add(modulename)
-	if not f then
-		if not ignoreError then error("required '"..tostring(modulename).."' cannot be loaded", 2) end
-	else
-		local status, err = pcall(f)
-		if not status and not ignoreError then error(err, 2) end
-	end
-end
-include = function(modulename) require(modulename, true) end
-module = function(modulename) ui.module.add(modulename, true) end
-
-
-
-
-
 --- all functions and objects below this line may subject to be changed and/or removed
 
 function ui.onShortcutPressed(...)
@@ -302,14 +274,24 @@ string.style = function(string, style)
 	if style.bold then string = "<b>"..string.."</b>" end
 	if style.italic then string = "<i>"..string.."</i>" end
 	if style.color and #style.color > 3 then string = "<color="..style.color..">"..string.."</color>" end
-	if style.size then string = "<size="..math.floor(style.size * client.screen._fsmul + 0.5)..">"..string.."</size>" end
+	if style.size then string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>" end
 	return string
 end
 string.rect = function(string)
 	local str = string:gsub("<[^>]*>", "")
 	local s = tonumber(string:match("<size=(%d-)>"))
-	if not s then s = math.floor(12 * client.screen._fsmul + 0.5) end
-	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) *0.9, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proptional letters
+	if not s then s = math.floor(12 * client.screen.pxptRatio + 0.5) end
+	local mul = 0.9
+	if string:contains("<b>") or string:contains("<i>") then mul = 1 end
+	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) * mul, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proptional letters
+end
+
+table.maxn = function(self)
+	local n = 0
+	for _ in next, self do
+		n = n + 1
+	end
+	return n
 end
 
 -- removed with libsota.ui and replaced with a slighty different ui.rect object
@@ -357,13 +339,13 @@ rect = {
 				r.top = client.screen.height / 100 * top
 			end
 		end
-		
+
 		setmetatable(r, {__index = rect})
 		return r
 	end,
 
 	fromString = string.style,
-	
+
 	moveTo = function(rect, x, y)
 		if not x then x = (client.screen.width - rect.width) / 2 end
 		if not y then y = (client.screen.height - rect.height) / 2 end
@@ -371,19 +353,19 @@ rect = {
 		rect.top = y
 		return rect
 	end,
-	
+
 	moveBy = function(rect, x, y)
 		rect.left = rect.left + x
 		rect.top = rect.top + y
 		return rect
 	end,
-	
+
 	resizeTo = function(rect, w, h)
 		rect.width = w
 		rect.height = h
 		return rect
 	end,
-	
+
 	resizeBy = function(rect, w, h)
 		rect.width = rect.width + w
 		rect.height = rect.height + h

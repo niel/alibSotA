@@ -1,4 +1,4 @@
--- libsota.0.4.8 by Catweazle Waldschrath
+-- libsota.0.5.d by Catweazle Waldschrath
 
 
 --[[
@@ -39,7 +39,7 @@ client = {
 		height = 0,
 		isFullScreen = false,
 		aspectRatio = 0,
-		_fsmul = 1,
+		pxptRatio = 1,
 	},
 	api = {
 		luaVersion = "",
@@ -104,7 +104,7 @@ player = {
 	end,
 }
 ui = {
-	version = "0.4.8",
+	version = "0.5.d",
 
 	timer = {
 		list = {},
@@ -151,7 +151,7 @@ ui = {
 	setTimeout = function(timeout, callback, ...) return ui.timer.add(timeout, true, callback, ...) end,
 	setInterval = function(interval, callback, ...) return ui.timer.add(interval, false, callback, ...) end,
 
-	
+
 	handler = {
 		list = {},
 		add = function(name, callback)
@@ -162,7 +162,7 @@ ui = {
 				name = name,
 				callback = callback,
 			}
-			return index	
+			return index
 		end,
 		remove = function(index)
 			ui.handler.list[index] = nil
@@ -277,13 +277,13 @@ ui = {
 			obj.rect.height = obj.rect.height + y
 		end,
 	},
-	
-	
+
+
 	label = {
 		add = function(left, top, width, height, caption)
 			local l = ui.guiObject.add(left, top, width, height, ui.label.draw)
 			l.caption = caption or ""
-			
+
 			setmetatable(l, {__index = ui.label})
 			return l
 		end,
@@ -291,11 +291,15 @@ ui = {
 			ShroudGUILabel(l.rect.left, l.rect.top, l.rect.width, l.rect.height, l.caption)
 		end,
 	},
-	
+
 	texture = {
 		_loaded = {},
 		add = function(left, top, filename, clamped, scaleMode, width, height)
-			
+
+			if filename:startsWith(ShroudLuaPath) then
+				filename = filename:gsub("^"..ShroudLuaPath.."[\\/]", "")
+			end
+
 			if not ui.texture._loaded[tostring(filename)] then
 				local tid = ShroudLoadTexture(filename, clamped or false)
 				if tid < 0 then
@@ -330,7 +334,7 @@ ui = {
 			t.shownInScene = texture.shownInScene
 			t.shownInLoadScreen = texture.shownInLoadScreen
 			t.zIndex = texture.zIndex
-						
+
 			setmetatable(t, {__index = ui.texture})
 			return t
 		end,
@@ -348,7 +352,7 @@ ui = {
 			return texture.scaleMode
 		end,
 	},
-	
+
 	guiButton = {
 		add = function(left, top, texture, caption, tooltip, width, height)
 			local b = ui.guiObject.add(left, top, width, height, ui.guiButton.draw)
@@ -359,10 +363,10 @@ ui = {
 			if type(texture) == "table" and texture.texture and texture.texture.id then
 				b.texture = texture
 			else
-				print("ui.guiButton: "..type(texture).." is not a texture object.")
+				print("ui.guiButton: "..type(texture)..": "..tostring(texture).." is not a texture object.")
 				return nil
 			end
-			
+
 			setmetatable(b, {__index = ui.guiButton})
 			return b
 		end,
@@ -424,7 +428,7 @@ ui = {
 			ui.shortcut.list[index.action][index.key][index.id].callback()
 		end,
 	},
-	
+
 	command = {
 		list = {},
 		add = function(command, callback)
@@ -459,105 +463,7 @@ ui = {
 			end
 		end
 	},
-	
-	module = {
-		list = {},
-		add = function(modulename, prefix)
-			local part = {}
-			for p in modulename:gmatch("[^\\/.]+") do part[#part + 1] = p end
-			if part[#part] == "lua" then part[#part] = nil end
-			modulename = table.concat(part, ".")
-			if not ui.module.list[modulename] then
-				local filename = table.concat(part, "/")..".lua"
-				local f = nil
-				for _,inc in next, {"/","/lib/","/share/","/bin/","/include/"} do
-					f = io.open(ShroudLuaPath..inc..filename)
-					if f then break end
-				end
-				if not f then
-					print("ui.module: '",filename,"' not found")
-					return nil
-				end
-				local d = f:read("*a")
-				f:close()
-				local m,e = loadsafe(d, modulename, "bt", _G)
-				if not m then
-					print("ui.module: '",modulename,"': "..e)
-					return nil
-				end
-				ui.module.list[modulename] = {}
-				ui.module.list[modulename][0] = m
-			end
-			if prefix then
-				if prefix == true or prefix == "" then
-					prefix = modulename
-				else
-					part = {}
-					for p in prefix:gmatch("[^\\/.]+") do part[#part + 1] = p end
-					if part[#part] == "lua" then part[#part] = nil end
-					prefix = table.concat(part, ".")
-				end
-				if #part == 1 then
-					_G[part[1]] = ui.module.list[modulename][0]
-				else
-					local tree = {}
-					local leave = tree
-					for i=2,#part-1 do
-						if not leave[part[i]] then leave[part[i]] = {} end
-						leave = leave[part[i]]
-					end
-					leave[part[#part]] = ui.module.list[modulename][0]
-					_G[part[1]] = tree
-				end
-				ui.module.list[modulename][#ui.module.list[modulename] + 1] = part
-			end
-			return ui.module.list[modulename][0]
-		end,
-		get = function(modulename)
-			local part = {}
-			for p in modulename:gmatch("[^\\/.]+") do part[#part + 1] = p end
-			if part[#part] == "lua" then part[#part] = nil end
-			modulename = table.concat(part, ".")
-			return ui.module.list[tostring(modulename)][0]
-		end,
-		remove = function(modulename)
-			local part = {}
-			for p in modulename:gmatch("[^\\/.]+") do part[#part + 1] = p end
-			if part[#part] == "lua" then part[#part] = nil end
-			modulename = table.concat(part, ".")
-			ui.module.list[tostring(modulename)][0] = nil
-			for _,prefix in next, ui.module.list[tostring(modulename)] do
-				if #prefix == 1 then
-					_G[prefix[1]] = nil
-				else
-					local tree = _G[prefix[1]]
-					local leave = tree
-					for i=2,#prefix-1 do
-						if leave[prefix[i]] then leave = leave[prefix[i]] end
-					end
-					leave[prefix[#prefix]] = nil
-					_G[prefix[1]] = tree
-				end
-			end
-			ui.module.list[tostring(modulename)] = nil
-		end,
-		invoke = function(modulename, callback, ...)
-			local part = {}
-			for p in modulename:gmatch("[^\\/.]+") do part[#part + 1] = p end
-			if part[#part] == "lua" then part[#part] = nil end
-			modulename = table.concat(part, ".")
-			if ui.module.list[modulename] then
-				if callback then
-					return ui.module.list[modulename][0][tostring(callback)](...)
-				else
-					return ui.module.list[modulename][0](...)
-				end
-			else
-				print("ui.module: ",modulename," not found")
-			end
-		end,
-	},
-	
+
 	verbosity = 0,
 	consoleLog = function(message, verbosity)
 		if not verbosity then verbosity = 0 end
@@ -683,7 +589,7 @@ local function ui_getPlayerInventory()
 			cs.n = cs.n + 1
 		end
 	end
-	
+
 	player.inventory = ret1
 	ui_inventory_quantity = ret2
 
@@ -716,7 +622,7 @@ local function ui_initialize()
 	client.screen.height = ShroudGetScreenY()
 	client.screen.isFullScreen = ShroudGetFullScreen()
 	client.screen.aspectRatio = client.screen.width / client.screen.height
-	client.screen._fsmul = client.screen.height / 1080
+	client.screen.pxptRatio = client.screen.height / 1080
 	for i=0, ShroudGetStatCount()-1, 1 do
 		local name = ShroudGetStatNameByNumber(i)
 		client._statEnum[tostring(name)] = i
@@ -746,7 +652,7 @@ local function ui_buildDrawList()
 
 	table.sort(ds, function(a, b) return a.zIndex < b.zIndex end)
 	table.sort(dl, function(a, b) return a.zIndex < b.zIndex end)
-	
+
 	ui_drawInScene = ds
 	ui_drawInLoadScreen = dl
 end
@@ -757,14 +663,14 @@ local function ui_queue(callback, ...)
 		ui_callback_queue[index] = {
 			callback = callback,
 			userdata = table.pack(...),
-		}	
+		}
 	else
 		for _,h in next, ui.handler.list do
 			if h.name == callback then
 				ui_callback_queue[index] = {
 					callback = h.callback,
 					userdata = table.pack(...),
-				}	
+				}
 				index = #ui_callback_queue + 1
 			end
 		end
@@ -780,16 +686,16 @@ local ui_timer_ts_fast = os.time()
 local ui_timer_ts_slow = os.time()
 function ui_timer_internal()
 	local ts = os.time()
-	
+
 	if ts - ui_timer_ts_fast > 0.240 then
 		ui_timer_ts_fast = ts
 
 		ui_getPlayerChange()
 	end
-	
+
 	if ts - ui_timer_ts_slow > 2 then
 		ui_timer_ts_slow = ts
-		
+
 		-- watch player xp
 		player.xp.producer = ShroudGetPooledProducerExperience()
 		player.xp.adventurer = ShroudGetPooledAdventurerExperience()
@@ -805,8 +711,8 @@ function ui_timer_internal()
 		q.callback(unpack(q.userdata))
 		ui_callback_queue[i] = nil
 	end
-	
-	
+
+
 	-- watch character sheet window (realtime)
 
 	local wo = ShroudIsCharacterSheetActive()
@@ -814,7 +720,7 @@ function ui_timer_internal()
 		local wx, wy = ShroudGetCharacterSheetPosition(); wx = wx - 860 -- bug
 		if wx ~= client.window.paperdoll.left or wy ~= client.window.paperdoll.top then
 			client.window.paperdoll.left, client.window.paperdoll.top = wx, wy
-			ui.handler.invoke("_clientWindow", "moved", client.window.paperdoll)		
+			ui.handler.invoke("_clientWindow", "moved", client.window.paperdoll)
 		end
 	end
 	if wo ~= client.window.paperdoll.open then
@@ -829,7 +735,7 @@ end
 
 function ui_timer_user()
 	local ts = os.time()
-	
+
 	for _,t in next, ui.timer.list do
 		if t.enabled and ts >= t.time then
 			if t.interval then
@@ -837,7 +743,14 @@ function ui_timer_user()
 			else
 				ui.timer.list[t._index] = nil
 			end
+			--local cts = os.time()
 			if t.callback(unpack(t.userdata)) then ui.timer.list[t._index] = nil end
+			-- experimental
+			--if ui.timer.list[t._index] and (not client.isHitching or client.isLoading) and os.time() - cts >= 0.1 then
+			--	print("hanging timer: "..t._index.." -> disabled")
+			--	ui.timer.list[t._index].enabled = false
+			--	ui.timer.list[t._index].hanging = true
+			--end
 		end
 	end
 end
@@ -975,8 +888,8 @@ function ShroudOnUpdate()
 	end
 
 
-	ui.handler.invoke("_update")	
-	
+	ui.handler.invoke("_update")
+
 	if ui_drawListChanged then
 		ui_drawListChanged = false
 		ui_buildDrawList()
@@ -996,13 +909,22 @@ function ShroudOnGUI()
 		client.isLoading = isLoading
 		ui.handler.invoke("_clientIsLoading")
 	end
-		
+
 	if not isHitching then
 		local list = ui_drawInScene
 		if isLoading then list = ui_drawInLoadScreen end
-		
+
 		for _,o in next, list do
+			--[[if o.caption then
+				ShroudGUILabel(o.rect.left, o.rect.top, o.rect.width, o.rect.height, o.caption)
+			elseif o.texture then
+				ShroudDrawTexture()
+			else
+				ShroudButton()
+			end]]
+			--ui.label.draw(o)
 			o:guiDrawFunc()
+			--if os.time() - ts > 0.01 then print("gui bail out"); break end
 			if os.time() - ts > 0.01 then break end
 		end
 	end

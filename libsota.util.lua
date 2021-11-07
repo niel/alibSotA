@@ -500,6 +500,15 @@ function ShroudOnLogout()
 	--client.isLoggedIn = false
 end
 
+function ShroudOnMouseClick()
+end
+
+function ShroudOnMouseOut()
+end
+
+function ShroudOnMouseOver()
+end
+
 function ShroudOnSceneLoaded(SceneName)
 	--scene.name = SceneName
 	--client.isLoggedIn = true

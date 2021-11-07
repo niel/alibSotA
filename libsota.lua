@@ -844,6 +844,71 @@ end
 
 
 -- shroud callbacks
+local button_ts = {} -- howto: clean up
+local button_ts2 = {}
+
+function ShroudOnConsoleInput(channel, sender, message)
+
+	ui_queue(function(...)
+
+		-- handle player flag changes
+		if (channel == "Story" or channel == "System") and message:find("PvP") then ui_getPlayerName() end
+
+		-- parse message
+		local src, dst, msg = message:match("^(.-) to (.-) %[.-:%s*(.*)$")
+		if sender == "" then sender = src end
+		if sender == "" then sender = player.name end
+		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
+			local cmd, tail = msg:match("^[\\_!](%w+)%s*(.*)$")
+			local source = {
+				channel = channel,
+				sender = sender,
+				receiver = dst,
+			}
+			if ui.command.list[cmd] then
+				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
+				and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
+				and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
+				then
+					local arg = {}
+					for a in tail:gmatch("%S+") do arg[#arg + 1] = a end
+					arg.n = #arg
+					ui.command.list[cmd].callback(source, unpack(arg))
+				end
+			else
+				ui.handler.invoke("_consoleCommand", source, cmd, tail)
+			end
+		else
+			ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
+		end
+
+	end, channel, sender, message)
+end
+
+function ShroudOnGUI()
+	local ts = os.time()
+	local isHitching = ts - ui_client_ts >= 2
+	local isLoading = ts - ui_client_ts >= 5
+
+	if isHitching and client.isHitching ~= isHitching then
+		client.isHitching = isHitching
+		ui.handler.invoke("_clientIsHitching")
+	end
+	if isLoading and client.isLoading ~= isLoading then
+		client.isLoading = isLoading
+		ui.handler.invoke("_clientIsLoading")
+	end
+		
+	if not isHitching then
+		local list = ui_drawInScene
+		if isLoading then list = ui_drawInLoadScreen end
+		
+		for _,o in next, list do
+			o:guiDrawFunc()
+			if os.time() - ts > 0.01 then break end
+		end
+	end
+end
 
 function ShroudOnStart()
 	ShroudUseLuaConsoleForPrint(true)
@@ -851,8 +916,6 @@ function ShroudOnStart()
 	ShroudConsoleLog("LUA Version: ".._G._MOONSHARP.luacompat)
 end
 
-local button_ts = {} -- howto: clean up
-local button_ts2 = {}
 function ShroudOnUpdate()
 	local ts = os.time()
 
@@ -983,66 +1046,18 @@ function ShroudOnUpdate()
 	end
 end
 
-function ShroudOnGUI()
-	local ts = os.time()
-	local isHitching = ts - ui_client_ts >= 2
-	local isLoading = ts - ui_client_ts >= 5
 
-	if isHitching and client.isHitching ~= isHitching then
-		client.isHitching = isHitching
-		ui.handler.invoke("_clientIsHitching")
-	end
-	if isLoading and client.isLoading ~= isLoading then
-		client.isLoading = isLoading
-		ui.handler.invoke("_clientIsLoading")
-	end
-		
-	if not isHitching then
-		local list = ui_drawInScene
-		if isLoading then list = ui_drawInLoadScreen end
-		
-		for _,o in next, list do
-			o:guiDrawFunc()
-			if os.time() - ts > 0.01 then break end
-		end
-	end
+
+-- implement other ShroudOn... to allow other scripts
+function ShroudOnLogout()
+	--client.isLoggedIn = false
 end
 
-function ShroudOnConsoleInput(channel, sender, message)
-
-	ui_queue(function(...)
-
-		-- handle player flag changes
-		if (channel == "Story" or channel == "System") and message:find("PvP") then ui_getPlayerName() end
-
-		-- parse message
-		local src, dst, msg = message:match("^(.-) to (.-) %[.-:%s*(.*)$")
-		if sender == "" then sender = src end
-		if sender == "" then sender = player.name end
-		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
-			local cmd, tail = msg:match("^[\\_!](%w+)%s*(.*)$")
-			local source = {
-				channel = channel,
-				sender = sender,
-				receiver = dst,
-			}
-			if ui.command.list[cmd] then
-				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
-				and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
-				and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
-				then
-					local arg = {}
-					for a in tail:gmatch("%S+") do arg[#arg + 1] = a end
-					arg.n = #arg
-					ui.command.list[cmd].callback(source, unpack(arg))
-				end
-			else
-				ui.handler.invoke("_consoleCommand", source, cmd, tail)
-			end
-		else
-			ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
-		end
-
-	end, channel, sender, message)
+function ShroudOnSceneLoaded(SceneName)
+	--scene.name = SceneName
+	--client.isLoggedIn = true
 end
 
+function ShroudOnSceneUnloaded()
+	--scene.name = ""
+end

@@ -1,0 +1,52 @@
+version 0.3
+
+Callbacks:
+ui.onInit() -- called on the first update. used to initialize variable and such things
+ui.onConsoleInput(type, src, dst, msg) -- called when text is entered or arrived in the chat window an it is not a command. type = message type, src = message from name, dst = message to name, msg = message
+ui.onConsoleCommand(cmd, src, dst, arg) -- called when a command (message starts with\) is entered or arrived. cmd = commad, src = message from name, dst = message to name, arg = first argument
+ui.onUpdate() -- called on each frame. please use setInterval or setTimeout instead.
+
+Timers:
+int id = setInterval(interval, callback) -- executes callback each interval seconds
+int id = setTimeout(timeout, callback) -- executes callback when timeout is reached
+cancelTimer(id) -- cancel a timer
+
+Label:
+int id = createLabel(left, top, width, height, text) -- creates a new label. labels are not shown, so you can create your ui without distortion. left and top can be "c", that means center
+table label = getLabel(index) -- returns the label
+table text = getLabelText(index) -- returns the text object of the label. (current returns string -- text not working, yet)
+setLabelString(index, string) -- sets the caption of the labels text object (currently use setLabelText(index, text))
+removeLabel(index) -- removes a label
+showLabel(index) -- set labels visibility to true
+hideLabel(index) -- set labels visibility to false
+moveLabelBy(index, x, y) -- move label relative to its current position. x and y are deltas
+moveLabelTo(index, x, y) -- move label to the position given by x and y
+
+ui.label, ui.text and ui.timer can also be accessed directly.
+
+client.started -- time when the client was started
+client.fps -- shows current fps
+client.accuracy --
+client.screen.width -- width of client window
+client.screen.heigh -- height of client window
+client.screen.isFullScreen -- tells if client is used in fullscreen mode
+
+player.name -- Name of the logged in avatar
+player.x() -- returns x position of the avatar
+player.y() -- returns y position of the avatar
+player.z() -- returns z position of the avatar
+player.health() -- returns current health of the avatar
+player.focus() -- returns current focus of the avatar
+player.stat(index) -- return stat info. stat.name = name of stat, stat.number = number of stat, stat.value = value of stat, stat.description = description of stat (not working in 885)
+
+player.name is set when the player send a message from the console/chat window. it may be used to check if the sender of a message is the player
+As long no player.name is set, ui.onConsoleCommand is not invoked.
+Usually typing \command in the console will set the player.name. so ui.onConsoleCommand should work without problems.
+
+Things todo:
+getting text object to work
+windows containing objects -> labels, progressbar, statusbar, table and giving the window a z-index
+notify object
+caching stat name/number for name / number lookup
+client.language
+... 

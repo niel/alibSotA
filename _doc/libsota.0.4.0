@@ -1,0 +1,31 @@
+needs Live 1077
+
+i tested libsota.0.4.0 / libsota.util.0.4 and it is time to release it
+
+client.timeToLoad - tells how long it tooks to load into the first scene
+ui.label.size was removed
+ui.label.resizeTo - resizes a label to the given size
+ui.label.resizeBy - resizes a label to the given delta size
+
+ui.keyStrokes was renamed to ui.shortcut
+ui.shortcut.add("press", key,[key],...,callback) - adds a shortcut and invoke the callback when the shortcut was pressed
+ui.shortcut.add("watch", key,[key],...,callback) - add a shortcut and invoke the callback on shortcut down,up,held and pressed
+callback shortcut(string state, string key, table modifiers) - when "watch" was used
+callback shortcut() - when "press" was used.
+"pressed" is not send when the shortcut was held. the sequence is as follows:
+user pressed a shortcut: down, up, pressed
+user held a shortcut: down, held, [held], [held], ..., [held], up
+
+callback playerChanged(what) - the invoked function tells in its argument what, what has changed: moving, standing, stillness, name or damage. When playerChanged is invoked because of damage two arguments are added: health and focus
+ui.onPlayerDamage(health, focus) and ui.onPlayerChanged("damage", health, focus) are called when either current focus or current health about to change. (so, not only on damage)
+
+player.health and player.focus - the percentage now needs to be multiplied by 100 to get a percent value. this is easier when it is used for a progress bar:
+max_dots * player.health.percentage for "on" dots and 100 * player.health.percentage for the percentage value to show
+
+----- libsota.utl
+added:
+resizeLabelBy
+resizeLabelTo
+ui.onShortcutPressed(key,[key],...,callback) - invoked when a shourcut was used
+ui.onShortcut(key,[key],...,callback) - invoked on shortcut down, up, held or pressed
+ 

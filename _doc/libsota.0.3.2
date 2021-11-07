@@ -1,0 +1,129 @@
+needs QA build 886
+
+There is a problem with QA 886 regarding ShroudOn.. and ShroudRegisterPeriodic. The handlers and periodics are called more then one time. see
+Please add the following lines to each script that is loaded by the shroud lua interpreter to avoid strange problems/behaviors and don't use ShroudRegisterPeriodic:
+Code:
+
+-- kill hooks
+function ShroudOnConsoleInput() end
+function ShroudOnGUI() end
+function ShroudOnUpdate() end
+function ShroudOnStart() end
+
+You can use the handlers and timers from libsota instead, they do not have that problem.
+
+
+Handlers are now used like the timers. This allows that more then one script can use the handlers and timers.
+Aka. functions are subscribing to a handler.
+Code:
+
+-- ui.onInit(function() <function body> end)
+--
+-- setInterval(interval, function() <function body> end)
+--
+-- or
+--
+-- function myInit() <function body> end
+-- ui.onInit(myInit)
+--
+-- function myPeriodic() <function body> end
+-- setInterval(interval, myPeriodic)
+--
+
+
+ui.onInit(function()
+-- do the init stuff
+end)
+
+ui.onConsoleCommand(function(command, sender, receiver, tail)
+-- handle console input starting with \
+-- tail is the remainder after the command
+end)
+
+ui.onConsoleInput(function(channel, sender, receiver, message)
+-- handle all other console input
+end)
+
+ui.onUpdate(function()
+-- called on every frame. Please use setInterval or setTimeout instead.
+end)
+
+setInterval(interval, function()
+-- handle peridioc things
+end)
+
+setTimeout(timeout, function()
+-- handle something after timeout is reached
+end)
+
+
+You can also create your own handlers if you need
+Code:
+
+--
+-- int ui.handler.add(name, callback)
+--      add a callback to a named event. Returns the index of the callback
+-- ui.handler.remove(index)
+--      removes a callback
+-- ui.handler.invoke(name, ...)
+--      invokes all callbacks that has subscribed to the named event
+--
+
+-- Creating a handler for the "local" chat where other scripts may subscribe to
+-- The handler is called: onLocalChat
+
+-- helper function
+onLocalChat(callback) ui.handler.add("onLocalChat", callback) end
+
+-- catch console input and invoke the user created handler when necessary
+ui.onConsoleInput(function(channel, sender, receiver, message)
+     if channel == "Local" then
+          ui.handler.invoke("onLocalChat", sender, receiver, message)
+     end
+end)
+
+-- the handler can be used in the same script or in any other script
+-- subscribe and function in one step
+onLocalChat(function(sender, receiver, message)
+   -- do stuff here
+end)
+
+
+---- in another script
+
+-- function to handle local chat events
+function myLocalChatInput(sender, receiver, message)
+   -- do other stuff here
+end
+
+-- subscripe to the handler
+onLocalChat(myLocalChatInput)
+
+
+-- When the "onLocalChat" event is invoked the function of both handlers are executed.
+
+
+
+Timers can now be paused and resumed. This can be used when the function(s) are not used at the moment because the window/label is hidden. But needed again when the window/label is visible again.
+Timers can now be canceled when the return value is true (or any other value then nil, false or nothing).
+
+pauseTimer(index) -- pauses a timer
+resumeTimer(index) -- resumes a timer
+
+player.stat includes the stat description since QA 886
+
+A scene object was added:
+scene.name() -- returns the name of the current scene
+scene.maxPlayer() -- gives the max. number of players allowed in this instance
+scene.isPvp() -- yes
+scene.isPot() -- says if the player is in a POT or not
+
+ui.label.create -- left, top, width and height accepting also the values nil and a percantage value (given as string with a percante sign at the end, eg: "50%" ).
+nil for left and top means center, for width and height it means standard values
+percentage values for width and height means as much percent from screen.height / screen.width
+for left and top positive values means as many percent away from top or left side of screen, negative values means as many percent away from the right side or the bottom of screen.
+
+the window object is not finished yet.
+
+Since QA 886 libsota needs not to be pasted in your code. All .lua files in <datafolder>/Lua are loaded. So you may save the example into another file.
+

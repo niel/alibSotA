@@ -1,0 +1,43 @@
+    Added the new functions from QA that should also be available on the Live. But missed the ShroudButton. Will be in the next libsota.
+    New is mouse support, textures, player inventory and events regarding the character sheet (paperdoll). Party interface is still delayed
+
+    client.mouse.button - contains an array with the state of the mouse buttons. Eg, left button state: button[0] tells up, held or down. right button is button[1]. up to 6 buttons supported. Button not down: button[x] == nil
+    client.mouse.x - tells the x position of the mouse
+    client.mouse.y - tells the y positions of the mouse
+    client.window.paperdoll - contains a table: { open = true/false, left, top, with, height } telling if the window is open and its metrics
+
+    player.inventory - contains an array of tables { name, durability, primaryDurability, maxDurability, weight, quantity, value }. To get the name of the third item in inventory: player.inventory[3].name
+    player.xp is now a table { adventurer, producer }. Changed from a function to table
+
+    ui.onClientWindow(which, window) - is invoked when a window is opened or closed. which contains the name and window points to the window in client.window.
+    ui.onMouseMove(button, x, y) - is invoked when the mouse is moved. button contains the table from client.mouse.button. x and y mouse position
+    ui.onMouseButton(state, id, x, y) - is invoked on mouse button. state: down, up, held, clicked, dblclicked. id is the id that can be used to lookup client.button[id]. 0 is left button, 1 is right button. x and y is mouse position
+    ui.onPlayerInventory(changes) - will invoked when something in the player inventory has changed (currently only quantity). for itemname, what in next, changes tells what is changed. what contains: { quantity, action } and action: added, removed or changed.
+    ui.onPlayerChanged(what, changes) - will also invoked when something in the inventory has changed. what is "inventory" in this case
+
+    ui.texture.add(left, top, filename, clamped, scaleMode, width, height) - adds a texture and returns the index to the instance
+    ui.texture.clone(index) - clones the texture instance and returns the index of the new instance. The returned instance visible state is false.
+    ui.texture.get(index) - get the texture instance
+    ui.texture.remove(index) - removes a texture instance
+    ui.texture.clamp(index, clamped) - sets or gets if the texture is/should be clamped
+    ui.texture.scaleMode(index, scaleMode) - sets or gets the scale mode for this texture instance
+    ui.texture.rect(index, rect) - applies a rect structure to the texture instance
+    ui.texture.visibile(index, visible) - sets or gets if the texture instance visible state
+    ui.texture.toggle(index) - toggles the visibility of this texture instance
+    ui.texture.moveTo(index), ui.texture.moveBy(index) - moves the texture instance. by = relative, to = absolute
+    ui.texture.resizeTo(index), ui.texture.resizeBy(index) - resizes the texture instance. by = relative, to = absolute
+    ui.texture[index].shownInScene = bool: true to show in scene, false do not (default: true)
+    ui.texture[index].shownInLoadScreen = bool: true to show on loadscreen, false do not (default: false)
+    ui.texture[index].zIndex = number: the z-index of the texture instance
+    ui.texture[index].texture.width = original width of the texture
+    ui.texture[index].texture.height = original height of the texture
+    ui.texture[index].texture.id = id of the texture the texture instance is using
+
+    Textures are loaded only once. In the case that a texture is added with a filename that is already loaded a fresh instance is returned linked to the already loaded texture. It does not matter which mod has loaded this texture.
+    Currently there is no support to purge a texture, so ui.texture.remove will only destroy the texture instance, but the texture keeps in memory.
+    ScaleModes are: StretchToFill, ScaleAndCrop or ScaleToFit
+    The .png file format supports transparency.
+     
+
+Last edited: Nov 29, 2019
+

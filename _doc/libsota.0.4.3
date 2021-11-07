@@ -1,0 +1,123 @@
+client.api.list contains know also the globals from the shroud api
+client.api.isImplemented("<shroudfunction>") - returns true if the functions is available , false otherwise
+client.api.luaPath - added
+
+ui.onStart - is know invoked after all mods that are using the lib are initialized. ShroudOnStart must be used to ensure all scripts are loaded
+ui.onConsoleCommand is know invoked with source argument: callback(source, command, tail). source is a table containing sender, receiver and channel
+
+add player.isGod - true when player has [God] flag set
+
+the keycode still need a clean up.
+
+----libsota.util
+
+createLabelWithShadow - this will create a label with shadow. The functions from util (moveLabel, showLabel, .. and so on) have to be used, to deal with a label that has shadow
+
+@that_shawn_guy asked (here) to have OffsetCenterLabel added..
+That is now in: rect.fromString(caption):moveTo(nil, nil):moveBy(offsetX, offsetY) - get size of caption : move to center : offset from center
+moveLabelOffsetCenter(index, x, y) - can also be used to have the above in one function. caption is taken from the label
+
+rect object:
+
+rect(left, top, width, height) - creates a rect object for use in other rect functions (left or top = nil means center, width or height = nil means default size. for every argument a percent value can be given "5%")
+rect.fromString(string) - returns a rect that matches the size of the string. <size=nn></size> is supported. rect.left = 0, rect.top = 0, rect.with = width on screen of given string, rect.height = height on screen of given string
+rect.moveBy , rect.moveTo - moves rect to the given position (by = delta, to = absolute)
+rect.resizeBy, rect.resizeTo - resizes rect to the given size (by = delta, to = absolute)
+
+a rect can be applied to a label bei using ui.label.rect(index, rect)
+
+string object (added)
+string.style(string, style) or string:style(style) - applies a style to the string
+string.rect(string) or string:rect() - returns the rect from the string (alias for rect.fromString)
+
+style is a table that may contain: { size = <size>, color = <color>, bold = <true|false>, italic = <true|false> }
+Eg: string:style({ size = 16, bold = true })
+
+--- libsota.ui
+i was about to hack a window object into libsota.util quick and dirty. but that would need to much objects.
+so i decided to move on with libsota.ui
+to many players are asking... can i move the window, can i resize the font
+i try to bring this basic features into libsota.ui
+
+implenting the party interface is delayed in favor of libsota.ui
+
+Example using rect and style:
+
+    Code:
+
+    -- locTracker by Catweazle Waldschrath
+    -- depends on libsota.0.4.x
+
+
+    function ShroudOnStart()
+
+    -- apis are ready, time to compose our mod. (initialize)
+    ui.onInit(function()
+        local styleStillness = { size=14, color="#c4a000", bold=true }
+        local styleMoving = { size=14, color="yellow", bold=true }
+        local styleStanding = { size=14, color="#edd400", bold=true }
+        local styleShadow = { size=14, color="black", bold=true }
+
+        loctrack = {
+            enabled = true,
+            shadow = ui.label.add(),
+            label = ui.label.add(),
+            timer = ui.setInterval(0.25, function()
+                local loc = player.location
+                local caption = string.format("%s (x: %.2f, y: %.2f, z: %.2f)", loc.scene.name, loc.x, loc.y, loc.z)
+                local style = styleStanding
+               
+                if player.isMoving then
+                    style = styleMoving
+                elseif player.isStill then
+                    style = styleStillness
+                end
+
+                local r = rect.fromString(caption:style(style)):moveTo(nil, 90)
+                ui.label.rect(loctrack.label, r)
+                ui.label.rect(loctrack.shadow, r:moveBy(1,1))
+                ui.label.caption(loctrack.label, caption:style(style))
+                ui.label.caption(loctrack.shadow, caption:style(styleShadow))           
+            end),
+        }
+           
+        ui.command.add("loctrack", function()
+            loctrack.enabled = not loctrack.enabled
+
+            ui.timer.enabled(loctrack.timer, loctrack.enabled)
+            ui.label.visible(loctrack.label, loctrack.enabled)
+            ui.label.visible(loctrack.shadow, loctrack.enabled)
+           
+            local msg = createLabel(nil, nil, 180, 120)
+            if ui.timer.enabled(loctrack.timer) then
+                ui.label.caption(msg, "<size=16><color=white>locTracker activated</color></size>")
+            else
+                ui.label.caption(msg, "<size=16><color=white>locTracker deactivated</color></size>")
+            end
+            ui.label.visible(msg, true)
+            ui.setTimeout(3, function() ui.label.remove(msg) end)
+        end)
+        ui.shortcut.add("pressed", "RightAlt", "L", "loctrack")
+
+
+        -- all mods are initialized, time to start/run
+        ui.onStart(function()
+            ui.label.visible(loctrack.label, true)
+            ui.label.visible(loctrack.shadow, true)
+        end)
+       
+    end)
+
+
+
+
+    end -- ShroudOnStart
+
+    -- implement other ShroudOn... to allow other scripts
+    function ShroudOnConsoleInput() end
+    function ShroudOnGUI() end
+    function ShroudOnUpdate() end
+
+     
+
+

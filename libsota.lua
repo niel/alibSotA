@@ -645,15 +645,15 @@ local function ui_getPlayerChange()
 
 	if invoke then
 		if isMoving then
-			ui.handler.invoke("_playerMoveStart") -- depricated
+			ui.handler.invoke("_playerMoveStart") -- deprecated
 			ui.handler.invoke("_playerMove", "start", loc)
 			ui.handler.invoke("_playerChanged", "moving")
 		elseif isStill then
-			ui.handler.invoke("_playerIsStill") -- depricated?
+			ui.handler.invoke("_playerIsStill") -- deprecated?
 			ui.handler.invoke("_playerMove", "stillness", loc) -- hm?
 			ui.handler.invoke("_playerChanged", "stillness")
 		else
-			ui.handler.invoke("_playerMoveStop") -- depricated
+			ui.handler.invoke("_playerMoveStop") -- deprecated
 			ui.handler.invoke("_playerMove", "stop", loc)
 			ui.handler.invoke("_playerChanged", "standing")
 		end

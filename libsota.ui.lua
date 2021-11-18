@@ -49,8 +49,8 @@ ui.rect = function(left, top, width, height)
 	end
 
 	self.moveBy = function(dx, dy)
-		self.left = self.left + x
-		self.top = self.top + y
+		self.left = self.left + dx
+		self.top = self.top + dy
 	end
 
 	self.resizeTo = function(w, h)

@@ -1,7 +1,7 @@
 needs QA 889 (ShroudUseLuaConsoleForPrint(true) commented out)
 
 cleaned up libsota... and done some optimizations/polish
-libsota.util contains all functions apearing in the global namespace like labelCreate and such. They are comatible to libsota.0.3.x
+libsota.util contains all functions appearing in the global namespace like labelCreate and such. They are compatible to libsota.0.3.x
 i am working on libsota.ui a simple window class, a container for labels
 
 i made the decision to move the "gui" parts to an extra file, because there are already lua libs for graphical ui out there. may they can be used, saves a lot of work. And keep libsota small.
@@ -73,4 +73,4 @@ contains all the function from libsota.0.3.8 (createLabel, isLabelVisible, ...)
 hopefully when R73 is released an the last thunderday in month ... oh, wait....
 
 
-comments are welcome , also bug reports, or how to make things more usefull 
+comments are welcome , also bug reports, or how to make things more usefull

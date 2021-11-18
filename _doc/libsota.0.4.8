@@ -42,7 +42,7 @@
 
     The prefix can also be true or "". In this case the modulename is used as prefix.
 
-    ui.module.remove(modulname) - removes the module from memory. and from all prefixes that where used with this module. It cannot remove modules that are assigned to a variable. Like local myvar = ui.module.add or myvar = ui.module.add.
+    ui.module.remove(modulname) - removes the module from memory. and from all prefixes that were used with this module. It cannot remove modules that are assigned to a variable. Like local myvar = ui.module.add or myvar = ui.module.add.
 
     ui.module.invoke(modulename, function, ...) - calls the module code, even it is neither assigned to a variable or to a prefix.
     ui.module.get(modulename) - may be used to assign the module code to a variable at a later time. might it be a local or global variable.
@@ -56,6 +56,3 @@
 
 
     All of this needs some testing. Feedback is welcome.
-     
-
-

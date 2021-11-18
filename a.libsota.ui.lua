@@ -311,7 +311,7 @@ ui.application = {
 ui.shell = {
 	list = {},
 	active = nil,
-	draging = nil,
+	dragging = nil,
 	hover = nil,
 	activate = function(name)
 		local app = ui.shell.list[tostring(name)]
@@ -365,11 +365,11 @@ ui.shell = {
 	end,
 
 	onMouseButton = function(state, button, x, y)
-		if ui.shell.draging and state == "held" and button == 1 then
-			local f = ui.shell.draging
+		if ui.shell.dragging and state == "held" and button == 1 then
+			local f = ui.shell.dragging
 			f.object:moveTo(x - f._x, y - f._y)
-		elseif ui.shell.draging and state == "up" and button == 1 then
-			ui.shell.draging = nil
+		elseif ui.shell.dragging and state == "up" and button == 1 then
+			ui.shell.dragging = nil
 		end
 
 		for _,a in next, ui.shell.list do
@@ -398,7 +398,7 @@ ui.shell = {
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
 							end
 
-							ui.shell.draging = {
+							ui.shell.dragging = {
 								object = o,
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
@@ -451,7 +451,6 @@ function ShroudOnGUI()
 end
 
 function ShroudOnLogout()
-	--client.isLoggedIn = false
 end
 
 function ShroudOnMouseClick()
@@ -464,12 +463,9 @@ function ShroudOnMouseOver()
 end
 
 function ShroudOnSceneLoaded(SceneName)
-	--scene.name = SceneName
-	--client.isLoggedIn = true
 end
 
 function ShroudOnSceneUnloaded()
-	--scene.name = ""
 end
 
 function ShroudOnUpdate()

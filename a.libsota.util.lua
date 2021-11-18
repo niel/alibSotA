@@ -261,7 +261,7 @@ function moveTextureOffsetCenter(texture, x, y)
 end
 
 
---- all functions and objects below this line may subject to be changed and/or removed
+--- all functions and objects below this line are subject to be changed and/or removed
 
 function ui.onShortcutPressed(...)
 	return ui.shortcut.add("pressed", ...)
@@ -551,12 +551,9 @@ function ShroudOnMouseOver()
 end
 
 function ShroudOnSceneLoaded(SceneName)
-	--scene.name = SceneName
-	--client.isLoggedIn = true
 end
 
 function ShroudOnSceneUnloaded()
-	--scene.name = ""
 end
 
 function ShroudOnUpdate()

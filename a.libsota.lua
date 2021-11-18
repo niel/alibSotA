@@ -31,6 +31,7 @@ client = {
 	accuracy = 0,
 	isHitching = false,
 	isLoading = false,
+	isLoggedIn = false,
 	_statEnum = {},
 	_statDescr = {},
 	screen = {
@@ -63,6 +64,7 @@ client = {
 
 scene = {
 	name = "none",
+	levelCap = 200,
 	maxPlayer = 0,
 	isPvp = false,
 	isPot = false,
@@ -266,7 +268,6 @@ ui = {
 	onMouseButton = function(callback)
 		return ui.handler.add("_mouseButton", callback)
 	end,
-
 
 	guiObject = {
 		add = function(left, top, width, height, drawFunc)
@@ -744,6 +745,7 @@ local function ui_getSceneName()
 		scene.isPvp = ShroudGetCurrentSceneIsPVP()
 		scene.isPot = ShroudGetCurrentSceneIsPOT()
 		scene.timeStarted = os.time()
+		scene.levelCap = ShroudGetSceneCap()
 		ui.handler.invoke("_sceneChanged")
 	end
 end
@@ -820,9 +822,7 @@ local function ui_queue(callback, ...)
 	end
 end
 
-
 -- shroud timers
-
 local ui_timer_ts_fast = os.time()
 local ui_timer_ts_slow = os.time()
 
@@ -993,6 +993,7 @@ function ShroudOnStart()
 	ShroudUseLuaConsoleForPrint(true)
 	ShroudConsoleLog(_G._MOONSHARP.banner)
 	ShroudConsoleLog("LUA Version: ".._G._MOONSHARP.luacompat)
+	client.isLoggedIn = true
 end
 
 function ShroudOnUpdate()
@@ -1016,7 +1017,7 @@ function ShroudOnUpdate()
 
 	if ts - ui_client_ts >= 1 then
 		if client.accuracy > 10 then
-			ui_getSceneName()
+			--ui_getSceneName()
 			ui_getPlayerName()
 			client.isLoading = false
 			scene.timeToLoad = client.accuracy
@@ -1142,7 +1143,7 @@ end
 
 -- implement other ShroudOn... to allow other scripts
 function ShroudOnLogout()
-	--client.isLoggedIn = false
+	client.isLoggedIn = false
 end
 
 function ShroudOnMouseClick()
@@ -1155,8 +1156,8 @@ function ShroudOnMouseOver()
 end
 
 function ShroudOnSceneLoaded(SceneName)
-	--scene.name = SceneName
-	--client.isLoggedIn = true
+	ui_getSceneName()
+	client.isLoggedIn = true
 end
 
 function ShroudOnSceneUnloaded()

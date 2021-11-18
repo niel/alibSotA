@@ -165,6 +165,7 @@ ui.titlebar = {
 		ico:zIndex(-1)
 		self:add("_caption", lbl, 32, 2, self.rect.width, 32)
 		self:add("_icon", ico, 2, 2, 24, 24)
+
 		return self
 	end,
 
@@ -195,6 +196,7 @@ ui.button = {
 		local self = ui.container.new({left=0, top=0, width=lbl.rect.width, height=32})
 		self:add("_caption", lbl, 2, 2, self.rect.width, 32)
 		self:add("_icon", ico, 0, 0, self.rect.width, 32)
+
 		return self
 	end,
 
@@ -244,6 +246,7 @@ ui.application = {
 		self.texture = function(left, top, filename, clamped, scaleMode, width, height)
 			local tex = ui_tex(left, top, filename, clamped, scaleMode, width, height)
 			self.list[#self.list + 1] = tex
+
 			return tex
 		end
 
@@ -256,12 +259,14 @@ ui.application = {
 		self.label = function(left, top, width, height, caption)
 			local lbl = ui_label(left, top, width, height, caption)
 			self.list[#self.list + 1] = lbl
+
 			return lbl
 		end
 
 		ui.label.add = self.label
 		ui.text = function(text)
 			local r = text:rect()
+
 			return ui.label.add(r.left, r.top, r.width, r.height, text)
 		end
 
@@ -299,13 +304,18 @@ ui.shell = {
 	hover = nil,
 	activate = function(name)
 		local app = ui.shell.list[tostring(name)]
-		if app and app.onActivate then app.onActivate() end
+		if app and app.onActivate then
+			app.onActivate()
+		end
 	end,
 
 	deactivate = function(name)
 		local app = ui.shell.list[tostring(name)]
 		if app then
-			if app.onDeactivate then app.onDeactivate() end
+			if app.onDeactivate then
+				app.onDeactivate()
+			end
+
 			for _,o in app.list do
 				o:remove()
 			end
@@ -327,9 +337,15 @@ ui.shell = {
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
 							}
-							if o.onMouseEnter then o.onMouseEnter() end
+
+							if o.onMouseEnter then
+								o.onMouseEnter()
+							end
 						end
-						if o.onMouseMove then o.onMouseMove(button, x - o.rect.left, y - o.rect.top) end
+
+						if o.onMouseMove then
+							o.onMouseMove(button, x - o.rect.left, y - o.rect.top)
+						end
 					end
 				end
 			end
@@ -357,6 +373,7 @@ ui.shell = {
 								}
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
 							end
+
 							if o ~= ui.shell.active.object then
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() - 100)
 								ui.shell.active = {
@@ -366,13 +383,17 @@ ui.shell = {
 								}
 								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
 							end
+
 							ui.shell.draging = {
 								object = o,
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
 							}
 						end
-						if o.onMouseButton then	o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top) end
+
+						if o.onMouseButton then
+							o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top)
+						end
 					end
 				end
 			end

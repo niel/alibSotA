@@ -64,6 +64,7 @@ end
 
 function toggleTimer(index)
 	ui.timer.list[index].enabled = not ui.timer.list[index].enabled
+
 	return ui.timer.list[index].enabled
 end
 
@@ -76,6 +77,7 @@ end
 
 function createLabel(left, top, width, height, caption)
 	local r = rect(left, top, width, height)
+
 	return ui.label.add(r.left, r.top, r.width, r.height, caption)
 end
 
@@ -84,6 +86,7 @@ function createLabelWithShadow(left, top, width, height, caption)
 	local s = ui.label.add(r.left+1, r.top+1, r.width, r.height, caption)
 	local l = ui.label.add(r.left, r.top, r.width, r.height, caption)
 	l.shadow = s
+
 	return l
 end
 
@@ -101,6 +104,7 @@ function setLabelCaption(label, caption)
 		local c = caption:gsub("<color=.->", "<color=black>")
 		label.shadow.caption = "<color=black>"..c.."</color>"
 	end
+
 	label.caption = caption
 end
 setLabelText = setLabelCaption -- depricated
@@ -109,6 +113,7 @@ function removeLabel(label)
 	if label.shadow then
 		label.shadow:remove()
 	end
+
 	label:remove()
 end
 
@@ -132,6 +137,7 @@ function setLabelVisible(label, visible)
 	if label.shadow then
 		label.shadow:visible(visible)
 	end
+
 	label:visible(visible)
 end
 
@@ -144,6 +150,7 @@ function moveLabelTo(label, x, y)
 		label.shadow.rect.left = x + 1
 		label.shadow.rect.top = y + 1
 	end
+
 	label.rect.left = x
 	label.rect.top = y
 end
@@ -157,6 +164,7 @@ function resizeLabelTo(label, w, h)
 		label.shadow.rect.width = width
 		label.shadow.rect.height = height
 	end
+
 	label.rect.width = w
 	label.rect.height = h
 end
@@ -180,6 +188,7 @@ end
 
 function createTexture(left, top, width, height, filename)
 	local r = rect(left, top, width, height)
+
 	return ui.texture.add(r.left, r.top, filename, true, nil, r.width, r.height)
 end
 
@@ -263,24 +272,37 @@ load = loadsafe
 loadfile = ui.module.add
 dofile = function(modulename)
 	local f = ui.module.add(modulename)
-	if f then return f() end
-end
-require = function(modulename, ignoreError)
-	local f = ui.module.get(modulename)
-	if f then return end
-	f = ui.module.add(modulename)
-	if not f then
-		if not ignoreError then error("required '"..tostring(modulename).."' cannot be loaded", 2) end
-	else
-		local status, err = pcall(f)
-		if not status and not ignoreError then error(err, 2) end
+	if f then
+		return f()
 	end
 end
-include = function(modulename) require(modulename, true) end
-module = function(modulename) ui.module.add(modulename, true) end
 
+require = function(modulename, ignoreError)
+	local f = ui.module.get(modulename)
+	if f then
+		return
+	end
 
+	f = ui.module.add(modulename)
+	if not f then
+		if not ignoreError then
+			error("required '"..tostring(modulename).."' cannot be loaded", 2)
+		end
+	else
+		local status, err = pcall(f)
+		if not status and not ignoreError then
+			error(err, 2)
+		end
+	end
+end
 
+include = function(modulename)
+	require(modulename, true)
+end
+
+module = function(modulename)
+	ui.module.add(modulename, true)
+end
 
 
 --- all functions and objects below this line may subject to be changed and/or removed
@@ -288,9 +310,11 @@ module = function(modulename) ui.module.add(modulename, true) end
 function ui.onShortcutPressed(...)
 	return ui.shortcut.add("pressed", ...)
 end
+
 function ui.onShortcut(...)
 	return ui.shortcut.add("watch", ...)
 end
+
 ui.registerKey = ui.onShortcutPress -- depricated: ui.registerKey is about to be removed]]
 
 ui.onCommand = ui.command.add
@@ -299,24 +323,41 @@ ui.onCommand = ui.command.add
 -- compat functions libsota.0.4.x
 -- moves to libsota.ui
 string.style = function(string, style)
-	if style.bold then string = "<b>"..string.."</b>" end
-	if style.italic then string = "<i>"..string.."</i>" end
-	if style.color and #style.color > 3 then string = "<color="..style.color..">"..string.."</color>" end
-	if style.size then string = "<size="..math.floor(style.size * client.screen._fsmul + 0.5)..">"..string.."</size>" end
+	if style.bold then
+		string = "<b>"..string.."</b>"
+	end
+
+	if style.italic then
+		string = "<i>"..string.."</i>"
+	end
+
+	if style.color and #style.color > 3 then
+		string = "<color="..style.color..">"..string.."</color>"
+	end
+
+	if style.size then
+		string = "<size="..math.floor(style.size * client.screen._fsmul + 0.5)..">"..string.."</size>"
+	end
+
 	return string
 end
+
 string.rect = function(string)
 	local str = string:gsub("<[^>]*>", "")
 	local s = tonumber(string:match("<size=(%d-)>"))
-	if not s then s = math.floor(12 * client.screen._fsmul + 0.5) end
+	if not s then
+		s = math.floor(12 * client.screen._fsmul + 0.5)
+	end
+
 	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) *0.9, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proptional letters
 end
 
--- removed with libsota.ui and replaced with a slighty different ui.rect object
+-- removed with libsota.ui and replaced with a slightly different ui.rect object
 rect = {
 	_new = function(self, left, top, width, height)
 		return self.new(left, top, width, height)
 	end,
+
 	new = function(left, top, width, height)
 		local r = {
 			left = left,
@@ -331,12 +372,14 @@ rect = {
 			width = tonumber(string.match(width, "^%d+"))
 			r.width = client.screen.width / 100 * math.abs(width)
 		end
+
 		if not height then
 			r.height = client.screen.height / 3.6
 		elseif tonumber(height) == nil then
 			height = tonumber(string.match(height, "^%d+"))
 			r.height = client.screen.height / 100 * math.abs(height)
 		end
+
 		if not left then
 			r.left = (client.screen.width - r.width) / 2
 		elseif tonumber(left) == nil then
@@ -347,6 +390,7 @@ rect = {
 				r.left = client.screen.width / 100 * left
 			end
 		end
+
 		if not top then
 			r.top = (client.screen.height - r.height) / 2
 		elseif tonumber(top) == nil then
@@ -357,42 +401,51 @@ rect = {
 				r.top = client.screen.height / 100 * top
 			end
 		end
-		
+
 		setmetatable(r, {__index = rect})
+
 		return r
 	end,
 
 	fromString = string.style,
-	
+
 	moveTo = function(rect, x, y)
-		if not x then x = (client.screen.width - rect.width) / 2 end
-		if not y then y = (client.screen.height - rect.height) / 2 end
+		if not x then
+			x = (client.screen.width - rect.width) / 2
+		end
+
+		if not y then
+			y = (client.screen.height - rect.height) / 2
+		end
+
 		rect.left = x
 		rect.top = y
+
 		return rect
 	end,
-	
+
 	moveBy = function(rect, x, y)
 		rect.left = rect.left + x
 		rect.top = rect.top + y
+
 		return rect
 	end,
-	
+
 	resizeTo = function(rect, w, h)
 		rect.width = w
 		rect.height = h
+
 		return rect
 	end,
-	
+
 	resizeBy = function(rect, w, h)
 		rect.width = rect.width + w
 		rect.height = rect.height + h
+
 		return rect
 	end,
 }
 setmetatable(rect, {__call = rect._new})
-
-
 
 
 -- implement Shroud calls
@@ -410,6 +463,7 @@ function ShroudOnStart()
 				ui.consoleLog("type: /lua "..action.." in the chat window instead")
 			end
 		end)
+
 		ui.command.add("info", function(source, action, param)
 			if action == "xp" then
 				ui.consoleLog("Adventurer pooled XP: "..player.xp.adventurer.."\nProducer pooled XP: "..player.xp.producer)
@@ -428,20 +482,20 @@ function ShroudOnStart()
 			elseif action == "inventory" then
 				for _,i in next, player.inventory do
 					if not param or i.name:lower():find(param:lower()) then
-					if i.quantity > 1 then
-						-- stack value / quantity
-						ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
-					elseif i.maxDurability > 0 then
-						local c = "73d216"
-						if i.durability < 1 then
-							c = "cc0000"
-						elseif i.durability / i.maxDurability < 0.25 then
-							c = "edd400"
+						if i.quantity > 1 then
+							-- stack value / quantity
+							ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
+						elseif i.maxDurability > 0 then
+							local c = "73d216"
+							if i.durability < 1 then
+								c = "cc0000"
+							elseif i.durability / i.maxDurability < 0.25 then
+								c = "edd400"
+							end
+							ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
+						else
+							ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
 						end
-						ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
-					else
-						ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
-					end
 					end
 				end
 			elseif action == "client" or action == "player" or action == "scene" or action == "ui" then
@@ -463,24 +517,29 @@ function ShroudOnStart()
 				for _,t in next, ui.texture._loaded do
 					ui.consoleLog(string.format("texture %d: %s (%d x %d)", t.id, t.filename, t.width, t.height))
 				end
+
 				for n in next, ui.command.list do
 					ui.consoleLog("command: "..n)
 				end
+
 				for k,r in next, ui.shortcut.list.pressed do
 					for _,t in next, r do
 						local s = k
 						for _,p in next, t.keysHeld do
 							s = p.." + "..s
 						end
+
 						ui.consoleLog("shortcut pressed: "..s)
 					end
 				end
+
 				for k,r in next, ui.shortcut.list.watch do
 					for _,t in next, r do
 						local s = k
 						for _,p in next, t.keysHeld do
 							s = p.." + "..s
 						end
+
 						ui.consoleLog("shortcut watched: "..s)
 					end
 				end

@@ -38,7 +38,7 @@ client = {
 		height = 0,
 		isFullScreen = false,
 		aspectRatio = 0,
-		pxptRatio = 1,
+		pxptRatio = 1,	-- The ratio of pixel to point value?
 	},
 
 	api = {

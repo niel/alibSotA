@@ -166,9 +166,6 @@ ui = {
 			ui.timer.list[index].enabled = not ui.timer.list[index].enabled
 		end,
 	},
-	setTimeout = function(timeout, callback, ...) return ui.timer.add(timeout, true, callback, ...) end,
-	setInterval = function(interval, callback, ...) return ui.timer.add(interval, false, callback, ...) end,
-
 
 	handler = {
 		list = {},
@@ -199,76 +196,76 @@ ui = {
 	},
 
 	onInit = function(callback)
-    return ui.handler.add("_init", callback)
-  end,
+		return ui.handler.add("_init", callback)
+	end,
 
 	onStart = function(callback)
-    return ui.handler.add("_start", callback)
-  end,
+		return ui.handler.add("_start", callback)
+	end,
 
 	onUpdate = function(callback)
-    return ui.handler.add("_update", callback)
-  end,
+		return ui.handler.add("_update", callback)
+	end,
 
 	onConsoleInput = function(callback)
-    return ui.handler.add("_consoleInput", callback)
-  end,
+		return ui.handler.add("_consoleInput", callback)
+	end,
 
 	onConsoleCommand = function(callback)
-    return ui.handler.add("_consoleCommand", callback)
-  end,
+		return ui.handler.add("_consoleCommand", callback)
+	end,
 
 	onSceneChanged = function(callback)
-    return ui.handler.add("_sceneChanged", callback)
-  end,
+		return ui.handler.add("_sceneChanged", callback)
+	end,
 
 	onPlayerChanged = function(callback)
-    return ui.handler.add("_playerChanged", callback)
-  end,
+		return ui.handler.add("_playerChanged", callback)
+	end,
 
 	onPlayerMove = function(callback)
-    return ui.handler.add("_playerMove", callback)
-  end,
+		return ui.handler.add("_playerMove", callback)
+	end,
 
 	onPlayerMoveStart = function(callback)
-    return ui.handler.add("_playerMoveStart", callback)
-  end, -- deprecated
+		return ui.handler.add("_playerMoveStart", callback)
+	end, -- deprecated
 
 	onPlayerMoveStop = function(callback)
-    return ui.handler.add("_playerMoveStop", callback)
-  end, -- deprecated
+		return ui.handler.add("_playerMoveStop", callback)
+	end, -- deprecated
 
 	onPlayerIsStill = function(callback)
-    return ui.handler.add("_playerIsStill", callback)
-  end,
+		return ui.handler.add("_playerIsStill", callback)
+	end,
 
 	onPlayerDamage = function(callback)
-    return ui.handler.add("_playerDamage", callback)
-  end,
+		return ui.handler.add("_playerDamage", callback)
+	end,
 
 	onPlayerInventory = function(callback)
-    return ui.handler.add("_playerInventory", callback)
-  end,
+		return ui.handler.add("_playerInventory", callback)
+	end,
 
 	onClientWindow = function(callback)
-    return ui.handler.add("_clientWindow", callback)
-  end,
+		return ui.handler.add("_clientWindow", callback)
+	end,
 
 	onClientIsHitching = function(callback)
-    return ui.handler.add("_clientIsHitching", callback)
-  end,
+		return ui.handler.add("_clientIsHitching", callback)
+	end,
 
 	onClientIsLoading = function(callback)
-    return ui.handler.add("_clientIsLoading", callback)
-  end,
+		return ui.handler.add("_clientIsLoading", callback)
+	end,
 
 	onMouseMove = function(callback)
-    return ui.handler.add("_mouseMove", callback)
-  end,
+		return ui.handler.add("_mouseMove", callback)
+	end,
 
 	onMouseButton = function(callback)
-    return ui.handler.add("_mouseButton", callback)
-  end,
+		return ui.handler.add("_mouseButton", callback)
+	end,
 
 
 	guiObject = {
@@ -372,7 +369,6 @@ ui = {
 		end,
 	},
 
-
 	label = {
 		add = function(left, top, width, height, caption)
 			local l = ui.guiObject.add(left, top, width, height, ui.label.draw)
@@ -452,6 +448,7 @@ ui = {
 			if scaleMode ~= nil then
 				texture.scaleMode = scaleMode
 			end
+
 			return texture.scaleMode
 		end,
 	},
@@ -471,6 +468,7 @@ ui = {
 			end
 
 			setmetatable(b, {__index = ui.guiButton})
+
 			return b
 		end,
 
@@ -496,7 +494,6 @@ ui = {
 			end
 		end,
 	},
-
 
 	shortcut = {
 		list = { pressed = {}, watch = {} },
@@ -533,7 +530,9 @@ ui = {
 
 		remove = function(index)
 			ui.shortcut.list[index.action][index.key][index.id] = nil
-			if #ui.shortcut.list[index.action][index.key] == 0 then ui.shortcut.list[index.action][index.key] = nil end
+			if #ui.shortcut.list[index.action][index.key] == 0 then
+				ui.shortcut.list[index.action][index.key] = nil
+			end
 		end,
 
 		invoke = function(index)
@@ -582,8 +581,8 @@ ui = {
 	verbosity = 0,
 	consoleLog = function(message, verbosity)
 		if not verbosity then
-      verbosity = 0
-    end
+			verbosity = 0
+		end
 
 		if ui.verbosity >= verbosity then
 			for l in message:gmatch("[^\n]+") do
@@ -633,11 +632,11 @@ end
 local function ui_getPlayerChange()
 	local loc = { x = ShroudPlayerX, y = ShroudPlayerY, z = ShroudPlayerZ, scene = scene }
 	local isMoving = loc.x ~= player.location.x or loc.y ~= player.location.y or loc.z ~= player.location.z
-  
+
 	if isMoving then
-    player.lastMoved = os.time()
-  end
-  
+		player.lastMoved = os.time()
+	end
+
 	local isStill = os.time() - player.lastMoved > 5
 	local invoke = isStill ~= player.isStill or isMoving ~= player.isMoving
 	player.isMoving = isMoving
@@ -846,7 +845,6 @@ function ui_timer_internal()
 		ui_getPlayerInventory()
 	end
 
-
 	-- queued callbacks
 
 	for i,q in next, ui_callback_queue do
@@ -854,9 +852,7 @@ function ui_timer_internal()
 		ui_callback_queue[i] = nil
 	end
 
-
 	-- watch character sheet window (realtime)
-
 	local wo = ShroudIsCharacterSheetActive()
 
 	if wo then
@@ -908,19 +904,19 @@ function ShroudOnConsoleInput(channel, sender, message)
 	ui_queue(function(...)
 		-- handle player flag changes
 		if (channel == "Story" or channel == "System") and message:find("PvP") then
-      ui_getPlayerName()
-    end
+			ui_getPlayerName()
+		end
 
 		-- parse message
 		local src, dst, msg = message:match("^(.-) to (.-) %[.-:%s*(.*)$")
 
 		if sender == "" then
-      sender = src
-    end
+			sender = src
+		end
 
 		if sender == "" then
-      sender = player.name
-    end
+			sender = player.name
+		end
 
 		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
 			local cmd, tail = msg:match("^[\\_!](%w+)%s*(.*)$")
@@ -932,14 +928,14 @@ function ShroudOnConsoleInput(channel, sender, message)
 
 			if ui.command.list[cmd] then
 				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
-            and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
-            and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
-            then
+						and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
+						and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
+						then
 					local arg = {}
 
-					for a in tail:gmatch("%S+") do 
-            arg[#arg + 1] = a
-          end
+					for a in tail:gmatch("%S+") do
+						arg[#arg + 1] = a
+					end
 
 					arg.n = #arg
 					ui.command.list[cmd].callback(source, unpack(arg))
@@ -972,8 +968,8 @@ function ShroudOnGUI()
 		local list = ui_drawInScene
 
 		if isLoading then
-      list = ui_drawInLoadScreen
-    end
+			list = ui_drawInLoadScreen
+		end
 
 		for _,o in next, list do
 			--[[if o.caption then
@@ -987,8 +983,8 @@ function ShroudOnGUI()
 			o:guiDrawFunc()
 			--if os.time() - ts > 0.01 then print("gui bail out"); break end
 			if os.time() - ts > 0.01 then
-        break
-      end
+				break
+			end
 		end
 	end
 end
@@ -1005,8 +1001,8 @@ function ShroudOnUpdate()
 	-- init
 	if not ui_initialized then
 		if not ShroudServerTime then
-      return
-    end -- shroud Api not ready, yet
+			return
+		end -- shroud Api not ready, yet
 
 		ShroudConsoleLog("Shroud Api Ready. ServerTime: "..ShroudServerTime)
 		ui_initialize()
@@ -1027,7 +1023,7 @@ function ShroudOnUpdate()
 		end
 
 		client.timeInGame = ShroudTime
-		client.timeDelta =  ShroudDeltaTime
+		client.timeDelta =	ShroudDeltaTime
 		client.fps = ui_client_frame
 		ui_client_frame = 0
 		client.accuracy = ts - ui_client_ts - 1
@@ -1045,10 +1041,10 @@ function ShroudOnUpdate()
 				for _,kd in next, f.keysHeld do
 					invoke = invoke and ShroudGetKeyDown(kd)
 				end
-        
+
 				if invoke then
-          f.callback()
-        end
+					f.callback()
+				end
 			end
 		end
 	end

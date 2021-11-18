@@ -143,7 +143,7 @@ function moveLabelTo(label, x, y)
 		label.shadow.rect.left = x + 1
 		label.shadow.rect.top = y + 1
 	end
-  
+
 	label.rect.left = x
 	label.rect.top = y
 end
@@ -157,7 +157,7 @@ function resizeLabelTo(label, w, h)
 		label.shadow.rect.width = width
 		label.shadow.rect.height = height
 	end
-  
+
 	label.rect.width = w
 	label.rect.height = h
 end
@@ -167,7 +167,7 @@ function setLabelRect(label, rect)
 	if label.shadow then
 		ui.guiObject.rect(label.shadow, rect:moveBy(1, 1))
 	end
-  
+
 end
 
 -- requested by that_shawn_guy
@@ -182,6 +182,7 @@ end
 
 function createTexture(left, top, width, height, filename)
 	local r = rect(left, top, width, height)
+
 	return ui.texture.add(r.left, r.top, filename, true, nil, r.width, r.height)
 end
 
@@ -279,20 +280,20 @@ ui.onCommand = ui.command.add
 -- moves to libsota.ui
 string.style = function(string, style)
 	if style.bold then
-    string = "<b>"..string.."</b>"
-  end
+		string = "<b>"..string.."</b>"
+	end
 
 	if style.italic then
-    string = "<i>"..string.."</i>"
-  end
+		string = "<i>"..string.."</i>"
+	end
 
 	if style.color and #style.color > 3 then
-    string = "<color="..style.color..">"..string.."</color>"
-  end
-  
+		string = "<color="..style.color..">"..string.."</color>"
+	end
+
 	if style.size then
-    string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>"
-  end
+		string = "<size="..math.floor(style.size * client.screen.pxptRatio + 0.5)..">"..string.."</size>"
+	end
 
 	return string
 end
@@ -302,14 +303,14 @@ string.rect = function(string)
 	local s = tonumber(string:match("<size=(%d-)>"))
 
 	if not s then
-    s = math.floor(12 * client.screen.pxptRatio + 0.5)
-  end
+		s = math.floor(12 * client.screen.pxptRatio + 0.5)
+	end
 
 	local mul = 0.9
 
 	if string:contains("<b>") or string:contains("<i>") then
-    mul = 1
-  end
+		mul = 1
+	end
 
 	return rect.new(0, 0, str:len() * (s/client.screen.aspectRatio) * mul, s*client.screen.aspectRatio) -- size of letter X, 0.9 because of proportional letters
 end
@@ -323,12 +324,12 @@ table.maxn = function(self)
 	return n
 end
 
--- removed with libsota.ui and replaced with a slighty different ui.rect object
+-- removed with libsota.ui and replaced with a slightly different ui.rect object
 rect = {
 	_new = function(self, left, top, width, height)
 		return self.new(left, top, width, height)
 	end,
-  
+
 	new = function(left, top, width, height)
 		local r = {
 			left = left,
@@ -343,14 +344,14 @@ rect = {
 			width = tonumber(string.match(width, "^%d+"))
 			r.width = client.screen.width / 100 * math.abs(width)
 		end
-    
+
 		if not height then
 			r.height = client.screen.height / 3.6
 		elseif tonumber(height) == nil then
 			height = tonumber(string.match(height, "^%d+"))
 			r.height = client.screen.height / 100 * math.abs(height)
 		end
-    
+
 		if not left then
 			r.left = (client.screen.width - r.width) / 2
 		elseif tonumber(left) == nil then
@@ -362,7 +363,7 @@ rect = {
 				r.left = client.screen.width / 100 * left
 			end
 		end
-    
+
 		if not top then
 			r.top = (client.screen.height - r.height) / 2
 		elseif tonumber(top) == nil then
@@ -382,13 +383,13 @@ rect = {
 	fromString = string.style,
 
 	moveTo = function(rect, x, y)
-		if not x then 
-      x = (client.screen.width - rect.width) / 2
-    end
+		if not x then
+			x = (client.screen.width - rect.width) / 2
+		end
 
 		if not y then
-      y = (client.screen.height - rect.height) / 2
-    end
+			y = (client.screen.height - rect.height) / 2
+		end
 
 		rect.left = x
 		rect.top = y
@@ -436,6 +437,7 @@ function ShroudOnStart()
 				ui.consoleLog("type: /lua "..action.." in the chat window instead")
 			end
 		end)
+
 		ui.command.add("info", function(source, action, param)
 			if action == "xp" then
 				ui.consoleLog("Adventurer pooled XP: "..player.xp.adventurer.."\nProducer pooled XP: "..player.xp.producer)
@@ -456,22 +458,22 @@ function ShroudOnStart()
 			elseif action == "inventory" then
 				for _,i in next, player.inventory do
 					if not param or i.name:lower():find(param:lower()) then
-            if i.quantity > 1 then
-              -- stack value / quantity
-              ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
-            elseif i.maxDurability > 0 then
-              local c = "73d216"
+						if i.quantity > 1 then
+							-- stack value / quantity
+							ui.consoleLog(string.format("%s [e9b96e](%d)   w:%0.1f   v:%d[-]", i.name, i.quantity, i.weight, i.value))
+						elseif i.maxDurability > 0 then
+							local c = "73d216"
 
-              if i.durability < 1 then
-                c = "cc0000"
-              elseif i.durability / i.maxDurability < 0.25 then
-                c = "edd400"
-              end
+							if i.durability < 1 then
+								c = "cc0000"
+							elseif i.durability / i.maxDurability < 0.25 then
+								c = "edd400"
+							end
 
-              ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
-            else
-              ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
-            end
+							ui.consoleLog(string.format("%s   [%s]%d/%d[-] (max %d)   w:%0.1f   v:%d", i.name, c, i.durability, i.primaryDurability, i.maxDurability, i.weight, i.value))
+						else
+							ui.consoleLog(string.format("%s   w:%0.1f   v:%d", i.name, i.weight, i.value))
+						end
 					end
 				end
 			elseif action == "client" or action == "player" or action == "scene" or action == "ui" then
@@ -494,11 +496,11 @@ function ShroudOnStart()
 				for _,t in next, ui.texture._loaded do
 					ui.consoleLog(string.format("texture %d: %s (%d x %d)", t.id, t.filename, t.width, t.height))
 				end
-        
+
 				for n in next, ui.command.list do
 					ui.consoleLog("command: "..n)
 				end
-        
+
 				for k,r in next, ui.shortcut.list.pressed do
 					for _,t in next, r do
 						local s = k
@@ -510,7 +512,7 @@ function ShroudOnStart()
 						ui.consoleLog("shortcut pressed: "..s)
 					end
 				end
-        
+
 				for k,r in next, ui.shortcut.list.watch do
 					for _,t in next, r do
 						local s = k

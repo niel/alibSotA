@@ -255,6 +255,7 @@ ui.application = {
 		self.texture = function(left, top, filename, clamped, scaleMode, width, height)
 			local tex = ui_tex(left, top, filename, clamped, scaleMode, width, height)
 			self.list[#self.list + 1] = tex
+
 			return tex
 		end
 
@@ -314,15 +315,17 @@ ui.shell = {
 	hover = nil,
 	activate = function(name)
 		local app = ui.shell.list[tostring(name)]
-		if app and app.onActivate then app.onActivate() end
+		if app and app.onActivate then
+			app.onActivate()
+		end
 	end,
 
 	deactivate = function(name)
 		local app = ui.shell.list[tostring(name)]
 		if app then
-			if app.onDeactivate then 
-        app.onDeactivate()
-      end
+			if app.onDeactivate then
+				app.onDeactivate()
+			end
 
 			for _,o in app.list do
 				o:remove()
@@ -348,13 +351,13 @@ ui.shell = {
 							}
 
 							if o.onMouseEnter then
-                o.onMouseEnter()
-              end
+								o.onMouseEnter()
+							end
 						end
 
 						if o.onMouseMove then
-              o.onMouseMove(button, x - o.rect.left, y - o.rect.top)
-            end
+							o.onMouseMove(button, x - o.rect.left, y - o.rect.top)
+						end
 					end
 				end
 			end
@@ -403,8 +406,8 @@ ui.shell = {
 						end
 
 						if o.onMouseButton then
-              o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top)
-            end
+							o.onMouseButton(state, button, x - o.rect.left, y - o.rect.top)
+						end
 					end
 				end
 			end

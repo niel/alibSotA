@@ -1,0 +1,12 @@
+a.libsota
+* Added client.isLoggedIn flag.
+* Moved ui_getSceneName() from ShroudOnUpdate to ShroudOnSceneLoaded.
+* Added scene.levelCap. It is an object containing .Level and .Skill.
+* Moved client, player, scene, and ui to be entries under als {} to prevent conflict with other globals (like the UI enum).
+
+a.libsota.ui
+* Fixed typo of ui.shell.draging
+* Moved client, player, scene, and ui to be entries under als {} to prevent conflict with other globals (like the UI enum).
+
+a.libsota.util
+* Moved client, player, scene, and ui to be entries under als {} to prevent conflict with other globals (like the UI enum).

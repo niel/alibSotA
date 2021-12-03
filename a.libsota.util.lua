@@ -24,12 +24,10 @@
 ]]
 
 
-
 --- credits
 -- that_shawn_guy - string.rect (from his offsetCenter)
 -- Toular - for helping me to find a font size multiplier that helps with fontsize at different resolutions.
 -- devilcult - for his dorequire. That made als.ui.module, and the utility functions therefore possible
-
 
 
 -- timer utility functions
@@ -268,14 +266,14 @@ end
 
 
 -- other utility functions
-load = loadsafe
-loadfile = als.ui.module.add
-dofile = function(modulename)
-	local f = als.ui.module.add(modulename)
-	if f then
-		return f()
-	end
-end
+--load = loadsafe
+--loadfile = als.ui.module.add
+--dofile = function(modulename)
+--	local f = als.ui.module.add(modulename)
+--	if f then
+--		return f()
+--	end
+--end
 
 require = function(modulename, ignoreError)
 	local f = als.ui.module.get(modulename)
@@ -307,17 +305,17 @@ end
 
 --- all functions and objects below this line may subject to be changed and/or removed
 
-function als.ui.onShortcutPressed(...)
-	return als.ui.shortcut.add("pressed", ...)
-end
+--function als.ui.onShortcutPressed(...)
+--	return als.ui.shortcut.add("pressed", ...)
+--end
 
-function als.ui.onShortcut(...)
-	return als.ui.shortcut.add("watch", ...)
-end
+--function als.ui.onShortcut(...)
+--	return als.ui.shortcut.add("watch", ...)
+--end
 
-als.ui.registerKey = als.ui.onShortcutPress -- depricated: als.ui.registerKey is about to be removed]]
+--als.ui.registerKey = als.ui.onShortcutPress -- depricated: als.ui.registerKey is about to be removed]]
 
-als.ui.onCommand = als.ui.command.add
+--als.ui.onCommand = als.ui.command.add
 
 
 -- compat functions libsota.0.4.x

@@ -20,9 +20,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.";
 ]]
 
+als = {
+	client = nil,
+	player = nil,
+	scene = nil,
+	ui = nil,
+}
 
-
-client = {
+als.client = {
 	timeStarted = os.time(),
 	timeToLoad = 0,
 	timeInGame = 0,
@@ -47,7 +52,7 @@ client = {
 		luaPath = "",
 		list = {},
 		isImplemented = function(name)
-			return client.api.list[name] ~= nil
+			return als.client.api.list[name] ~= nil
 		end
 	},
 
@@ -62,7 +67,7 @@ client = {
 	}
 }
 
-scene = {
+als.scene = {
 	name = "none",
 	levelCap = 200,
 	maxPlayer = 0,
@@ -73,7 +78,7 @@ scene = {
 	timeStarted = 0,
 }
 
-player = {
+als.player = {
 	caption = "",
 	name = "none",
 	flag = "",
@@ -83,7 +88,7 @@ player = {
 	isMoving = false,
 	isStill = false,
 	lastMoved = os.time(),
-	location = { x = 0, y = 0 , z = 0, scene = scene },
+	location = { x = 0, y = 0 , z = 0, scene = als.scene },
 	health = { current = 0, max = 0, percentage = 0 },
 	focus = { current = 0, max = 0, percentage = 0 },
 	xp = { producer = 0, adventurer = 0 },
@@ -98,37 +103,46 @@ player = {
 		}
 
 		if tonumber(index) == nil then
-			index = client._statEnum[index]
+			index = als.client._statEnum[index]
 		else
 			index = tonumber(index)
 		end
 
-		if index and index <= #client._statEnum then
+		if index and index <= #als.client._statEnum then
 			ret.number = index
-			ret.name = client._statEnum[index]
+			ret.name = als.client._statEnum[index]
 			ret.value = ShroudGetStatValueByNumber(index)
-			ret.description = client._statDescr[index]
+			ret.description = als.client._statDescr[index]
 		end
 
 		return ret
 	end,
 }
 
-ui = {
+als.ui = {
 	version = "0.5.d",
+
+	-- stubs for functions in a.libsota.ui.lua
+	application = nil,
+	button = nil,
+	container = nil,
+	rect = function() print("stub for rect function!") end,
+	shell = nil,
+	titlebar = nil,
+	window = nil,
 
 	timer = {
 		list = {},
 
 		add = function(timeout, once, callback, ...)
-			local index = #ui.timer.list + 1
+			local index = #als.ui.timer.list + 1
 			local interval = nil
 
 			if not once then
 				interval = timeout
 			end
 
-			ui.timer.list[index] = {
+			als.ui.timer.list[index] = {
 				_index = index,
 				time = os.time() + timeout,
 				interval = interval,
@@ -141,31 +155,31 @@ ui = {
 		end,
 
 		get = function(index)
-			return ui.timer.list[index]
+			return als.ui.timer.list[index]
 		end,
 
 		remove = function(index)
-			ui.timer.list[index] = nil
+			als.ui.timer.list[index] = nil
 		end,
 
 		enabled = function(index, enabled)
 			if enabled ~= nil then
-				ui.timer.list[index].enabled = enabled
+				als.ui.timer.list[index].enabled = enabled
 			end
 
-			return ui.timer.list[index].enabled
+			return als.ui.timer.list[index].enabled
 		end,
 
 		pause = function(index)
-			ui.timer.list[index].enabled = false
+			als.ui.timer.list[index].enabled = false
 		end,
 
 		resume = function(index)
-			ui.timer.list[index].enabled = true
+			als.ui.timer.list[index].enabled = true
 		end,
 
 		toggle = function(index)
-			ui.timer.list[index].enabled = not ui.timer.list[index].enabled
+			als.ui.timer.list[index].enabled = not als.ui.timer.list[index].enabled
 		end,
 	},
 
@@ -173,8 +187,8 @@ ui = {
 		list = {},
 
 		add = function(name, callback)
-			local index = #ui.handler.list + 1
-			ui.handler.list[index] = {
+			local index = #als.ui.handler.list + 1
+			als.ui.handler.list[index] = {
 				_index = index,
 				name = name,
 				callback = callback,
@@ -184,12 +198,12 @@ ui = {
 		end,
 
 		remove = function(index)
-			ui.handler.list[index] = nil
+			als.ui.handler.list[index] = nil
 		end,
 
 		invoke = function(name, ...)
-			if not ui_initialized then return end
-			for _,h in next, ui.handler.list do
+			if not als_ui_initialized then return end
+			for _,h in next, als.ui.handler.list do
 				if h.name == name then
 					h.callback(...)
 				end
@@ -198,81 +212,81 @@ ui = {
 	},
 
 	onInit = function(callback)
-		return ui.handler.add("_init", callback)
+		return als.ui.handler.add("_init", callback)
 	end,
 
 	onStart = function(callback)
-		return ui.handler.add("_start", callback)
+		return als.ui.handler.add("_start", callback)
 	end,
 
 	onUpdate = function(callback)
-		return ui.handler.add("_update", callback)
+		return als.ui.handler.add("_update", callback)
 	end,
 
 	onConsoleInput = function(callback)
-		return ui.handler.add("_consoleInput", callback)
+		return als.ui.handler.add("_consoleInput", callback)
 	end,
 
 	onConsoleCommand = function(callback)
-		return ui.handler.add("_consoleCommand", callback)
+		return als.ui.handler.add("_consoleCommand", callback)
 	end,
 
 	onSceneChanged = function(callback)
-		return ui.handler.add("_sceneChanged", callback)
+		return als.ui.handler.add("_sceneChanged", callback)
 	end,
 
 	onPlayerChanged = function(callback)
-		return ui.handler.add("_playerChanged", callback)
+		return als.ui.handler.add("_playerChanged", callback)
 	end,
 
 	onPlayerMove = function(callback)
-		return ui.handler.add("_playerMove", callback)
+		return als.ui.handler.add("_playerMove", callback)
 	end,
 
 	onPlayerMoveStart = function(callback)
-		return ui.handler.add("_playerMoveStart", callback)
+		return als.ui.handler.add("_playerMoveStart", callback)
 	end, -- deprecated
 
 	onPlayerMoveStop = function(callback)
-		return ui.handler.add("_playerMoveStop", callback)
+		return als.ui.handler.add("_playerMoveStop", callback)
 	end, -- deprecated
 
 	onPlayerIsStill = function(callback)
-		return ui.handler.add("_playerIsStill", callback)
+		return als.ui.handler.add("_playerIsStill", callback)
 	end,
 
 	onPlayerDamage = function(callback)
-		return ui.handler.add("_playerDamage", callback)
+		return als.ui.handler.add("_playerDamage", callback)
 	end,
 
 	onPlayerInventory = function(callback)
-		return ui.handler.add("_playerInventory", callback)
+		return als.ui.handler.add("_playerInventory", callback)
 	end,
 
 	onClientWindow = function(callback)
-		return ui.handler.add("_clientWindow", callback)
+		return als.ui.handler.add("_clientWindow", callback)
 	end,
 
 	onClientIsHitching = function(callback)
-		return ui.handler.add("_clientIsHitching", callback)
+		return als.ui.handler.add("_clientIsHitching", callback)
 	end,
 
 	onClientIsLoading = function(callback)
-		return ui.handler.add("_clientIsLoading", callback)
+		return als.ui.handler.add("_clientIsLoading", callback)
 	end,
 
 	onMouseMove = function(callback)
-		return ui.handler.add("_mouseMove", callback)
+		return als.ui.handler.add("_mouseMove", callback)
 	end,
 
 	onMouseButton = function(callback)
-		return ui.handler.add("_mouseButton", callback)
+		return als.ui.handler.add("_mouseButton", callback)
 	end,
 
 	guiObject = {
 		add = function(left, top, width, height, drawFunc)
-			local index = #ui_guiObjectList + 1
-			ui_guiObjectList[index] = {
+			local index = #als.ui_guiObjectList + 1
+			als.ui_guiObjectList[index] = {
 				rect = { left = left or 0, top = top or 0, width = width or 0, height = height or 0 },
 				visible = false,
 				shownInScene = true,
@@ -283,55 +297,55 @@ ui = {
 			local obj = {
 				guiDrawFunc = drawFunc,
 				guiObjectId = index,
-				rect = ui_guiObjectList[index].rect,
+				rect = als.ui_guiObjectList[index].rect,
 			}
 
-			setmetatable(obj, {__index = ui.guiObject})
-			setmetatable(ui_guiObjectList[index], {__index = obj})
+			setmetatable(obj, {__index = als.ui.guiObject})
+			setmetatable(als.ui_guiObjectList[index], { __index = obj})
 
 			return obj
 		end,
 
 		remove = function(obj)
-			ui_guiObjectList[obj.guiObjectId] = nil
+			als.ui_guiObjectList[obj.guiObjectId] = nil
 			obj = nil
-			ui_drawListChanged = true
+			als_ui_drawListChanged = true
 		end,
 
 		shownInScene = function(obj, shown)
-			if shown ~= nil and shown ~= ui_guiObjectList[obj.guiObjectId].shownInScene then
-				ui_guiObjectList[obj.guiObjectId].shownInScene = shown
-				ui_drawListChanged = true
+			if shown ~= nil and shown ~= als.ui_guiObjectList[obj.guiObjectId].shownInScene then
+				als.ui_guiObjectList[obj.guiObjectId].shownInScene = shown
+				als_ui_drawListChanged = true
 			end
 
-			return ui_guiObjectList[obj.guiObjectId].shownInScene
+			return als.ui_guiObjectList[obj.guiObjectId].shownInScene
 		end,
 
 		shownInLoadScreen = function(obj, shown)
-			if shown ~= nil and shown ~= ui_guiObjectList[obj.guiObjectId].shownInLoadScreen then
-				ui_guiObjectList[obj.guiObjectId].shownInLoadScreen = shown
-				ui_drawListChanged = true
+			if shown ~= nil and shown ~= als.ui_guiObjectList[obj.guiObjectId].shownInLoadScreen then
+				als.ui_guiObjectList[obj.guiObjectId].shownInLoadScreen = shown
+				als_ui_drawListChanged = true
 			end
 
-			return ui_guiObjectList[obj.guiObjectId].shownInLoadScreen
+			return als.ui_guiObjectList[obj.guiObjectId].shownInLoadScreen
 		end,
 
 		zIndex = function(obj, zIndex)
-			if zIndex ~= nil and zIndex ~= ui_guiObjectList[obj.guiObjectId].zIndex then
-				ui_guiObjectList[obj.guiObjectId].zIndex = zIndex
-				ui_drawListChanged = true
+			if zIndex ~= nil and zIndex ~= als.ui_guiObjectList[obj.guiObjectId].zIndex then
+				als.ui_guiObjectList[obj.guiObjectId].zIndex = zIndex
+				als_ui_drawListChanged = true
 			end
 
-			return ui_guiObjectList[obj.guiObjectId].zIndex
+			return als.ui_guiObjectList[obj.guiObjectId].zIndex
 		end,
 
 		visible = function(obj, visible)
-			if visible ~= nil and visible ~= ui_guiObjectList[obj.guiObjectId].visible then
-				ui_guiObjectList[obj.guiObjectId].visible = visible
-				ui_drawListChanged = true
+			if visible ~= nil and visible ~= als.ui_guiObjectList[obj.guiObjectId].visible then
+				als.ui_guiObjectList[obj.guiObjectId].visible = visible
+				als_ui_drawListChanged = true
 			end
 
-			return ui_guiObjectList[obj.guiObjectId].visible
+			return als.ui_guiObjectList[obj.guiObjectId].visible
 		end,
 
 		toggle = function(obj)
@@ -372,10 +386,10 @@ ui = {
 
 	label = {
 		add = function(left, top, width, height, caption)
-			local l = ui.guiObject.add(left, top, width, height, ui.label.draw)
+			local l = als.ui.guiObject.add(left, top, width, height, als.ui.label.draw)
 			l.caption = caption or ""
 
-			setmetatable(l, {__index = ui.label})
+			setmetatable(l, {__index = als.ui.label})
 			return l
 		end,
 
@@ -392,16 +406,16 @@ ui = {
 				filename = filename:gsub("^"..ShroudLuaPath.."[\\/]", "")
 			end
 
-			if not ui.texture._loaded[tostring(filename)] then
+			if not als.ui.texture._loaded[tostring(filename)] then
 				local tid = ShroudLoadTexture(filename, clamped or false)
 
 				if tid < 0 then
-					print("ui.texture: Unable to load texture with filename '"..filename.."'")
+					print("als.ui.texture: Unable to load texture with filename '"..filename.."'")
 					return nil
 				end
 
 				local tw, th = ShroudGetTextureSize(tid)
-				ui.texture._loaded[tostring(filename)] = {
+				als.ui.texture._loaded[tostring(filename)] = {
 					filename = filename,
 					id = tid,
 					width = tw,
@@ -410,12 +424,12 @@ ui = {
 				}
 			end
 
-			local tex = ui.texture._loaded[tostring(filename)]
+			local tex = als.ui.texture._loaded[tostring(filename)]
 
-			local t = ui.guiObject.add(left, top, width or tex.width, height or tex.height, ui.texture.draw)
+			local t = als.ui.guiObject.add(left, top, width or tex.width, height or tex.height, als.ui.texture.draw)
 			t.texture = tex
 			t.scaleMode = scaleMode or -1
-			setmetatable(t, {__index = ui.texture})
+			setmetatable(t, {__index = als.ui.texture})
 
 			return t
 		end,
@@ -425,14 +439,14 @@ ui = {
 		end,
 
 		clone = function(texture)
-			local t = ui.guiObject.add(texture.rect.left, texture.rect.top, texture.rect.width, texture.rect.height, texture.guiDrawFunc)
+			local t = als.ui.guiObject.add(texture.rect.left, texture.rect.top, texture.rect.width, texture.rect.height, texture.guiDrawFunc)
 			t.texture = texture.texture
 			t.scaleMode = texture.scaleMode
 			t.shownInScene = texture.shownInScene
 			t.shownInLoadScreen = texture.shownInLoadScreen
 			t.zIndex = texture.zIndex
 
-			setmetatable(t, {__index = ui.texture})
+			setmetatable(t, {__index = als.ui.texture})
 			return t
 		end,
 
@@ -456,7 +470,7 @@ ui = {
 
 	guiButton = {
 		add = function(left, top, texture, caption, tooltip, width, height)
-			local b = ui.guiObject.add(left, top, width, height, ui.guiButton.draw)
+			local b = als.ui.guiObject.add(left, top, width, height, als.ui.guiButton.draw)
 			b.caption = caption or ""
 			b.tooltip = tooltip or ""
 			-- b.mode = false -- mode = repeat, click, off/false
@@ -464,11 +478,11 @@ ui = {
 			if type(texture) == "table" and texture.texture and texture.texture.id then
 				b.texture = texture
 			else
-				print("ui.guiButton: "..type(texture)..": "..tostring(texture).." is not a texture object.")
+				print("als.ui.guiButton: "..type(texture)..": "..tostring(texture).." is not a texture object.")
 				return nil
 			end
 
-			setmetatable(b, {__index = ui.guiButton})
+			setmetatable(b, {__index = als.ui.guiButton})
 
 			return b
 		end,
@@ -502,17 +516,17 @@ ui = {
 			local keys = {...}
 			local callback = keys[#keys]; keys[#keys] = nil
 			local key = keys[#keys]; keys[#keys] = nil
-			if not ui.shortcut.list[action][tostring(key)] then
-				ui.shortcut.list[action][tostring(key)] = {}
+			if not als.ui.shortcut.list[action][tostring(key)] then
+				als.ui.shortcut.list[action][tostring(key)] = {}
 			end
 
 			if type(callback) == "string" then
-				callback = ui.command.list[callback].callback
+				callback = als.ui.command.list[callback].callback
 			end
 
-			local id = #ui.shortcut.list[action][key] + 1
+			local id = #als.ui.shortcut.list[action][key] + 1
 			local index = { action = action, key = key, id = id }
-			ui.shortcut.list[action][key][id] = {
+			als.ui.shortcut.list[action][key][id] = {
 				_index = index,
 				key = key,
 				keysHeld = keys,
@@ -520,61 +534,61 @@ ui = {
 			}
 
 			if type(callback) == string then
-				if ui.command.list[callback].shortcut then
-					ui.shortcut.remove(ui.command.list[callback].shortcut)
+				if als.ui.command.list[callback].shortcut then
+					als.ui.shortcut.remove(als.ui.command.list[callback].shortcut)
 				end
-				ui.command.list[callback].shortcut = index
+				als.ui.command.list[callback].shortcut = index
 			end
 
 			return index
 		end,
 
 		remove = function(index)
-			ui.shortcut.list[index.action][index.key][index.id] = nil
-			if #ui.shortcut.list[index.action][index.key] == 0 then
-				ui.shortcut.list[index.action][index.key] = nil
+			als.ui.shortcut.list[index.action][index.key][index.id] = nil
+			if #als.ui.shortcut.list[index.action][index.key] == 0 then
+				als.ui.shortcut.list[index.action][index.key] = nil
 			end
 		end,
 
 		invoke = function(index)
-			ui.shortcut.list[index.action][index.key][index.id].callback()
+			als.ui.shortcut.list[index.action][index.key][index.id].callback()
 		end,
 	},
 
 	command = {
 		list = {},
 		add = function(command, callback)
-			ui.command.list[tostring(command)] = {
+			als.ui.command.list[tostring(command)] = {
 				_command = command,
 				callback = callback,
 				shortcut = nil,
 				channel = nil,
-				sender = player.name,
+				sender = als.player.name,
 				receiver = nil,
 			}
 			return command
 		end,
 
 		remove = function(command)
-			if ui.command.list[command].shortcut then
-				ui.shortcut.remove(ui.command.list[command].shortcut)
+			if als.ui.command.list[command].shortcut then
+				als.ui.shortcut.remove(als.ui.command.list[command].shortcut)
 			end
-			ui.command.list[command] = nil
+			als.ui.command.list[command] = nil
 		end,
 
 		invoke = function(command, ...)
 			if ... then
-				ui.command.list[command].callback(nil, unpack(...))
+				als.ui.command.list[command].callback(nil, unpack(...))
 			else
-				ui.command.list[command].callback()
+				als.ui.command.list[command].callback()
 			end
 		end,
 
 		restrict = function(command, channel, sender, receiver)
-			if ui.command[command] then
-				ui.command[command].channel = channel
-				ui.command[command].sender = sender
-				ui.command[command].receiver = receiver
+			if als.ui.command[command] then
+				als.ui.command[command].channel = channel
+				als.ui.command[command].sender = sender
+				als.ui.command[command].receiver = receiver
 			end
 		end
 	},
@@ -585,26 +599,28 @@ ui = {
 			verbosity = 0
 		end
 
-		if ui.verbosity >= verbosity then
+		if als.ui.verbosity >= verbosity then
 			for l in message:gmatch("[^\n]+") do
 				ShroudConsoleLog(l)
 			end
 		end
 	end,
 }
---setmetatable(ui.timer, {__index = ui.timer.list})
-setmetatable(ui.label, {__index = ui.guiObject})
-setmetatable(ui.texture, {__index = ui.guiObject})
-setmetatable(ui.guiButton, {__index = ui.guiObject})
+
+--setmetatable(als.ui.timer, {__index = als.ui.timer.list})
+setmetatable(als.ui.label, { __index = als.ui.guiObject})
+setmetatable(als.ui.texture, { __index = als.ui.guiObject})
+setmetatable(als.ui.guiButton, { __index = als.ui.guiObject})
 
 
 -- internal
 
-ui_initialized = false
-ui_client_ts = os.time()
-ui_client_frame = 0
-ui_guiObjectList = {}
-ui_drawListChanged = false
+als.ui_initialized = false
+als.ui_client_ts = os.time()
+als.ui_client_frame = 0
+als.ui_guiObjectList = {}
+als_ui_drawListChanged = false
+
 local ui_drawInScene = {}
 local ui_drawInLoadScreen = {}
 local ui_callback_queue = {}
@@ -613,56 +629,56 @@ local ui_inventory_quantity = {}
 local ui_inventory_durability = {}
 
 local function ui_getPlayerName()
-	if player.caption ~= ShroudGetPlayerName() then
-		player.caption = ShroudGetPlayerName()
-		player.name = player.caption
-		player.flag = ""
-		player.isPvp = false
+	if als.player.caption ~= ShroudGetPlayerName() then
+		als.player.caption = ShroudGetPlayerName()
+		als.player.name = als.player.caption
+		als.player.flag = ""
+		als.player.isPvp = false
 
-		if player.name:byte(#player.name) == 93 then
-			player.name, player.flag = player.name:match("^(.-)(%[.-%])$")
-			player.isPvp = player.flag and player.flag:find("PVP") ~= nil
-			player.isAfk = player.flag and player.flag:find("AFK") ~= nil
-			player.isGod = player.flag and player.flag:find("God") ~= nil
+		if als.player.name:byte(#als.player.name) == 93 then
+			als.player.name, als.player.flag = als.player.name:match("^(.-)(%[.-%])$")
+			als.player.isPvp = als.player.flag and als.player.flag:find("PVP") ~= nil
+			als.player.isAfk = als.player.flag and als.player.flag:find("AFK") ~= nil
+			als.player.isGod = als.player.flag and als.player.flag:find("God") ~= nil
 		end
 
-		ui.handler.invoke("_playerChanged", "caption")
+		als.ui.handler.invoke("_playerChanged", "caption")
 	end
 end
 
 local function ui_getPlayerChange()
-	local loc = { x = ShroudPlayerX, y = ShroudPlayerY, z = ShroudPlayerZ, scene = scene }
-	local isMoving = loc.x ~= player.location.x or loc.y ~= player.location.y or loc.z ~= player.location.z
+	local loc = { x = ShroudPlayerX, y = ShroudPlayerY, z = ShroudPlayerZ, scene = als.scene }
+	local isMoving = loc.x ~= als.player.location.x or loc.y ~= als.player.location.y or loc.z ~= als.player.location.z
 
 	if isMoving then
-		player.lastMoved = os.time()
+		als.player.lastMoved = os.time()
 	end
 
-	local isStill = os.time() - player.lastMoved > 5
-	local invoke = isStill ~= player.isStill or isMoving ~= player.isMoving
-	player.isMoving = isMoving
-	player.isStill = isStill
-	player.location = loc
+	local isStill = os.time() - als.player.lastMoved > 5
+	local invoke = isStill ~= als.player.isStill or isMoving ~= als.player.isMoving
+	als.player.isMoving = isMoving
+	als.player.isStill = isStill
+	als.player.location = loc
 
 	if invoke then
 		if isMoving then
-			ui.handler.invoke("_playerMoveStart") -- deprecated
-			ui.handler.invoke("_playerMove", "start", loc)
-			ui.handler.invoke("_playerChanged", "moving")
+			als.ui.handler.invoke("_playerMoveStart") -- deprecated
+			als.ui.handler.invoke("_playerMove", "start", loc)
+			als.ui.handler.invoke("_playerChanged", "moving")
 		elseif isStill then
-			ui.handler.invoke("_playerIsStill") -- deprecated?
-			ui.handler.invoke("_playerMove", "stillness", loc) -- hm?
-			ui.handler.invoke("_playerChanged", "stillness")
+			als.ui.handler.invoke("_playerIsStill") -- deprecated?
+			als.ui.handler.invoke("_playerMove", "stillness", loc) -- hm?
+			als.ui.handler.invoke("_playerChanged", "stillness")
 		else
-			ui.handler.invoke("_playerMoveStop") -- deprecated
-			ui.handler.invoke("_playerMove", "stop", loc)
-			ui.handler.invoke("_playerChanged", "standing")
+			als.ui.handler.invoke("_playerMoveStop") -- deprecated
+			als.ui.handler.invoke("_playerMove", "stop", loc)
+			als.ui.handler.invoke("_playerChanged", "standing")
 		end
 	end
 
 	if isMoving then
-		ui.handler.invoke("_playerMove", "move", loc)
-		ui.handler.invoke("_playerChanged", "location", loc)
+		als.ui.handler.invoke("_playerMove", "move", loc)
+		als.ui.handler.invoke("_playerChanged", "location", loc)
 	end
 
 	local health = { max = ShroudGetStatValueByNumber(30), current = ShroudPlayerCurrentHealth, percentage = 0 }
@@ -670,15 +686,15 @@ local function ui_getPlayerChange()
 
 	health.percentage = health.current / health.max
 	focus.percentage = focus.current / focus.max
-	invoke = player.health.current ~= health.current or player.focus.current ~= focus.current
+	invoke = als.player.health.current ~= health.current or als.player.focus.current ~= focus.current
 
 	if invoke then
-		ui.handler.invoke("_playerDamage", health, focus)
-		ui.handler.invoke("_playerChanged", "damage", health, focus)
+		als.ui.handler.invoke("_playerDamage", health, focus)
+		als.ui.handler.invoke("_playerChanged", "damage", health, focus)
 	end
 
-	player.health = health
-	player.focus = focus
+	als.player.health = health
+	als.player.focus = focus
 end
 
 local function ui_getPlayerInventory()
@@ -728,48 +744,48 @@ local function ui_getPlayerInventory()
 		end
 	end
 
-	player.inventory = ret1
+	als.player.inventory = ret1
 	ui_inventory_quantity = ret2
 
 	if cs.n > 0 then
 		cs.n = nil
-		ui.handler.invoke("_playerInventory", cs)
-		ui.handler.invoke("_playerChanged", "inventory", cs)
+		als.ui.handler.invoke("_playerInventory", cs)
+		als.ui.handler.invoke("_playerChanged", "inventory", cs)
 	end
 end
 
 local function ui_getSceneName()
-	if scene.name ~= ShroudGetCurrentSceneName() then
-		scene.name = ShroudGetCurrentSceneName()
-		scene.maxPlayer = ShroudGetCurrentSceneMaxPlayerCount()
-		scene.isPvp = ShroudGetCurrentSceneIsPVP()
-		scene.isPot = ShroudGetCurrentSceneIsPOT()
-		scene.timeStarted = os.time()
-		scene.levelCap = ShroudGetSceneCap()
-		ui.handler.invoke("_sceneChanged")
+	if als.scene.name ~= ShroudGetCurrentSceneName() then
+		als.scene.name = ShroudGetCurrentSceneName()
+		als.scene.maxPlayer = ShroudGetCurrentSceneMaxPlayerCount()
+		als.scene.isPvp = ShroudGetCurrentSceneIsPVP()
+		als.scene.isPot = ShroudGetCurrentSceneIsPOT()
+		als.scene.timeStarted = os.time()
+		als.scene.levelCap = ShroudGetSceneCap()
+		als.ui.handler.invoke("_sceneChanged")
 	end
 end
 
 local function ui_initialize()
-	client.api.luaPath = ShroudLuaPath
-	client.api.luaVersion = _G._MOONSHARP.luacompat
+	als.client.api.luaPath = ShroudLuaPath
+	als.client.api.luaVersion = _G._MOONSHARP.luacompat
 
 	for i,v in next, _G do
-		if i:find("^Shroud") then client.api.list[tostring(i)] = type(v) end
+		if i:find("^Shroud") then als.client.api.list[tostring(i)] = type(v) end
 	end
 
-	client.timeToLoad = ui_client_ts - client.timeStarted
-	client.screen.width = ShroudGetScreenX()
-	client.screen.height = ShroudGetScreenY()
-	client.screen.isFullScreen = ShroudGetFullScreen()
-	client.screen.aspectRatio = client.screen.width / client.screen.height
-	client.screen.pxptRatio = client.screen.height / 1080
+	als.client.timeToLoad = als.ui_client_ts - als.client.timeStarted
+	als.client.screen.width = ShroudGetScreenX()
+	als.client.screen.height = ShroudGetScreenY()
+	als.client.screen.isFullScreen = ShroudGetFullScreen()
+	als.client.screen.aspectRatio = als.client.screen.width / als.client.screen.height
+	als.client.screen.pxptRatio = als.client.screen.height / 1080
 
 	for i=0, ShroudGetStatCount()-1, 1 do
 		local name = ShroudGetStatNameByNumber(i)
-		client._statEnum[tostring(name)] = i
-		client._statEnum[i] = name
-		client._statDescr[i] = ShroudGetStatDescriptionByNumber(i)
+		als.client._statEnum[tostring(name)] = i
+		als.client._statEnum[i] = name
+		als.client._statDescr[i] = ShroudGetStatDescriptionByNumber(i)
 	end
 
 	ui_getSceneName()
@@ -782,7 +798,7 @@ local function ui_initialize()
 end
 
 local function ui_buildDrawList()
-	local list = ui_guiObjectList
+	local list = als.ui_guiObjectList
 	local ds = {}
 	local dl = {}
 
@@ -810,7 +826,7 @@ local function ui_queue(callback, ...)
 			userdata = table.pack(...),
 		}
 	else
-		for _,h in next, ui.handler.list do
+		for _,h in next, als.ui.handler.list do
 			if h.name == callback then
 				ui_callback_queue[index] = {
 					callback = h.callback,
@@ -838,8 +854,8 @@ function ui_timer_internal()
 		ui_timer_ts_slow = ts
 
 		-- watch player xp
-		player.xp.producer = ShroudGetPooledProducerExperience()
-		player.xp.adventurer = ShroudGetPooledAdventurerExperience()
+		als.player.xp.producer = ShroudGetPooledProducerExperience()
+		als.player.xp.adventurer = ShroudGetPooledAdventurerExperience()
 
 		-- watch player inventory
 		ui_getPlayerInventory()
@@ -857,18 +873,18 @@ function ui_timer_internal()
 
 	if wo then
 		local wx, wy = ShroudGetCharacterSheetPosition(); wx = wx - 860 -- bug
-		if wx ~= client.window.paperdoll.left or wy ~= client.window.paperdoll.top then
-			client.window.paperdoll.left, client.window.paperdoll.top = wx, wy
-			ui.handler.invoke("_clientWindow", "moved", client.window.paperdoll)
+		if wx ~= als.client.window.paperdoll.left or wy ~= als.client.window.paperdoll.top then
+			als.client.window.paperdoll.left, als.client.window.paperdoll.top = wx, wy
+			als.ui.handler.invoke("_clientWindow", "moved", als.client.window.paperdoll)
 		end
 	end
 
-	if wo ~= client.window.paperdoll.open then
-		client.window.paperdoll.open = wo
+	if wo ~= als.client.window.paperdoll.open then
+		als.client.window.paperdoll.open = wo
 		if wo then
-			ui.handler.invoke("_clientWindow", "opened", client.window.paperdoll)
+			als.ui.handler.invoke("_clientWindow", "opened", als.client.window.paperdoll)
 		else
-			ui.handler.invoke("_clientWindow", "closed", client.window.paperdoll)
+			als.ui.handler.invoke("_clientWindow", "closed", als.client.window.paperdoll)
 		end
 	end
 end
@@ -876,20 +892,20 @@ end
 function ui_timer_user()
 	local ts = os.time()
 
-	for _,t in next, ui.timer.list do
+	for _,t in next, als.ui.timer.list do
 		if t.enabled and ts >= t.time then
 			if t.interval then
 				t.time = ts + t.interval
 			else
-				ui.timer.list[t._index] = nil
+				als.ui.timer.list[t._index] = nil
 			end
 			--local cts = os.time()
-			if t.callback(unpack(t.userdata)) then ui.timer.list[t._index] = nil end
+			if t.callback(unpack(t.userdata)) then als.ui.timer.list[t._index] = nil end
 			-- experimental
-			--if ui.timer.list[t._index] and (not client.isHitching or client.isLoading) and os.time() - cts >= 0.1 then
+			--if als.ui.timer.list[t._index] and (not als.client.isHitching or als.client.isLoading) and os.time() - cts >= 0.1 then
 			--	print("hanging timer: "..t._index.." -> disabled")
-			--	ui.timer.list[t._index].enabled = false
-			--	ui.timer.list[t._index].hanging = true
+			--	als.ui.timer.list[t._index].enabled = false
+			--	als.ui.timer.list[t._index].hanging = true
 			--end
 		end
 	end
@@ -915,7 +931,7 @@ function ShroudOnConsoleInput(channel, sender, message)
 		end
 
 		if sender == "" then
-			sender = player.name
+			sender = als.player.name
 		end
 
 		if msg:byte() == 92 or msg:byte() == 95 or msg:byte() == 33 then
@@ -926,10 +942,10 @@ function ShroudOnConsoleInput(channel, sender, message)
 				receiver = dst,
 			}
 
-			if ui.command.list[cmd] then
-				if not ui.command.list[cmd].sender or ui.command.list[cmd].sender == sender
-						and not ui.command.list[cmd].channel or ui.command.list[cmd].channel == channel
-						and not ui.command.list[cmd].receiver or ui.command.list[cmd].receiver == dst
+			if als.ui.command.list[cmd] then
+				if not als.ui.command.list[cmd].sender or als.ui.command.list[cmd].sender == sender
+						and not als.ui.command.list[cmd].channel or als.ui.command.list[cmd].channel == channel
+						and not als.ui.command.list[cmd].receiver or als.ui.command.list[cmd].receiver == dst
 						then
 					local arg = {}
 
@@ -938,30 +954,30 @@ function ShroudOnConsoleInput(channel, sender, message)
 					end
 
 					arg.n = #arg
-					ui.command.list[cmd].callback(source, unpack(arg))
+					als.ui.command.list[cmd].callback(source, unpack(arg))
 				end
 			else
-				ui.handler.invoke("_consoleCommand", source, cmd, tail)
+				als.ui.handler.invoke("_consoleCommand", source, cmd, tail)
 			end
 		else
-			ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
+			als.ui.handler.invoke("_consoleInput", channel, sender, dst, msg)
 		end
 	end, channel, sender, message)
 end
 
 function ShroudOnGUI()
 	local ts = os.time()
-	local isHitching = ts - ui_client_ts >= 2
-	local isLoading = ts - ui_client_ts >= 5
+	local isHitching = ts - als.ui_client_ts >= 2
+	local isLoading = ts - als.ui_client_ts >= 5
 
-	if isHitching and client.isHitching ~= isHitching then
-		client.isHitching = isHitching
-		ui.handler.invoke("_clientIsHitching")
+	if isHitching and als.client.isHitching ~= isHitching then
+		als.client.isHitching = isHitching
+		als.ui.handler.invoke("_clientIsHitching")
 	end
 
-	if isLoading and client.isLoading ~= isLoading then
-		client.isLoading = isLoading
-		ui.handler.invoke("_clientIsLoading")
+	if isLoading and als.client.isLoading ~= isLoading then
+		als.client.isLoading = isLoading
+		als.ui.handler.invoke("_clientIsLoading")
 	end
 
 	if not isHitching then
@@ -979,7 +995,7 @@ function ShroudOnGUI()
 			else
 				ShroudButton()
 			end]]
-			--ui.label.draw(o)
+			--als.ui.label.draw(o)
 			o:guiDrawFunc()
 			--if os.time() - ts > 0.01 then print("gui bail out"); break end
 			if os.time() - ts > 0.01 then
@@ -993,48 +1009,48 @@ function ShroudOnStart()
 	ShroudUseLuaConsoleForPrint(true)
 	ShroudConsoleLog(_G._MOONSHARP.banner)
 	ShroudConsoleLog("LUA Version: ".._G._MOONSHARP.luacompat)
-	client.isLoggedIn = true
+	als.client.isLoggedIn = true
 end
 
 function ShroudOnUpdate()
 	local ts = os.time()
 
 	-- init
-	if not ui_initialized then
+	if not als.ui_initialized then
 		if not ShroudServerTime then
 			return
 		end -- shroud Api not ready, yet
 
 		ShroudConsoleLog("Shroud Api Ready. ServerTime: "..ShroudServerTime)
 		ui_initialize()
-		ui_initialized = true
-		ui.handler.invoke("_init")
-		ui.handler.invoke("_start")
+		als.ui_initialized = true
+		als.ui.handler.invoke("_init")
+		als.ui.handler.invoke("_start")
 	end
 
 	-- client stats
-	ui_client_frame = ui_client_frame + 1;
+	als.ui_client_frame = als.ui_client_frame + 1;
 
-	if ts - ui_client_ts >= 1 then
-		if client.accuracy > 10 then
+	if ts - als.ui_client_ts >= 1 then
+		if als.client.accuracy > 10 then
 			--ui_getSceneName()
 			ui_getPlayerName()
-			client.isLoading = false
-			scene.timeToLoad = client.accuracy
+			als.client.isLoading = false
+			als.scene.timeToLoad = als.client.accuracy
 		end
 
-		client.timeInGame = ShroudTime
-		client.timeDelta =	ShroudDeltaTime
-		client.fps = ui_client_frame
-		ui_client_frame = 0
-		client.accuracy = ts - ui_client_ts - 1
-		ui_client_ts = ts
-		client.isHitching = false
-		scene.timeInScene = ts - scene.timeStarted
+		als.client.timeInGame = ShroudTime
+		als.client.timeDelta =	ShroudDeltaTime
+		als.client.fps = als.ui_client_frame
+		als.ui_client_frame = 0
+		als.client.accuracy = ts - als.ui_client_ts - 1
+		als.ui_client_ts = ts
+		als.client.isHitching = false
+		als.scene.timeInScene = ts - als.scene.timeStarted
 	end
 
 	-- check key up
-	for ku,r in next, ui.shortcut.list.pressed do
+	for ku,r in next, als.ui.shortcut.list.pressed do
 		if ShroudGetOnKeyUp(ku) then
 			for _,f in next, r do
 				local invoke = true
@@ -1051,7 +1067,7 @@ function ShroudOnUpdate()
 	end
 
 	-- check key held/repeat
-	for ku,r in next, ui.shortcut.list.watch do
+	for ku,r in next, als.ui.shortcut.list.watch do
 		if ShroudGetOnKeyDown(ku) then
 			for _,f in next, r do
 				local invoke = true
@@ -1101,41 +1117,41 @@ function ShroudOnUpdate()
 
 	-- check mouse
 	for i,mb in next, { "Mouse0", "Mouse1", "Mouse2", "Mouse3", "Mouse4", "Mouse5", "Mouse6" } do
-		client.mouse.button[i] = nil
+		als.client.mouse.button[i] = nil
 		if ShroudGetOnKeyDown(mb) then
 			button_ts[i] = os.time()
-			client.mouse.button[i] = "down"
+			als.client.mouse.button[i] = "down"
 		elseif ShroudGetKeyDown(mb) then
 			if os.time() - button_ts[i] >= 0.25 then
-				client.mouse.button[i] = "held"
+				als.client.mouse.button[i] = "held"
 			end
 		elseif ShroudGetOnKeyUp(mb) then
-			client.mouse.button[i] = "up"
+			als.client.mouse.button[i] = "up"
 			if os.time() - button_ts[i] <= 0.25 then
 				if button_ts2[i] and os.time() - button_ts2[i] <= 0.25 then
-					ui.handler.invoke("_mouseButton", "dblclicked", i, ShroudMouseX, ShroudMouseY)
+					als.ui.handler.invoke("_mouseButton", "dblclicked", i, ShroudMouseX, ShroudMouseY)
 					button_ts2[i] = nil
 				else
-					ui.handler.invoke("_mouseButton", "clicked", i, ShroudMouseX, ShroudMouseY)
+					als.ui.handler.invoke("_mouseButton", "clicked", i, ShroudMouseX, ShroudMouseY)
 					button_ts2[i] = os.time()
 				end
 			end
 		end
 	end
 
-	if client.mouse.x ~= ShroudMouseX or client.mouse.y ~= ShroudMouseY then
-		client.mouse.x, client.mouse.y = ShroudMouseX, ShroudMouseY
-		ui.handler.invoke("_mouseMove", client.mouse.button, client.mouse.x, client.mouse.y)
+	if als.client.mouse.x ~= ShroudMouseX or als.client.mouse.y ~= ShroudMouseY then
+		als.client.mouse.x, als.client.mouse.y = ShroudMouseX, ShroudMouseY
+		als.ui.handler.invoke("_mouseMove", als.client.mouse.button, als.client.mouse.x, als.client.mouse.y)
 	end
 
-	for i,mb in next, client.mouse.button do
-		ui.handler.invoke("_mouseButton", mb, i, client.mouse.x, client.mouse.y)
+	for i,mb in next, als.client.mouse.button do
+		als.ui.handler.invoke("_mouseButton", mb, i, als.client.mouse.x, als.client.mouse.y)
 	end
 
-	ui.handler.invoke("_update")
+	als.ui.handler.invoke("_update")
 
-	if ui_drawListChanged then
-		ui_drawListChanged = false
+	if als_ui_drawListChanged then
+		als_ui_drawListChanged = false
 		ui_buildDrawList()
 	end
 end
@@ -1143,7 +1159,7 @@ end
 
 -- implement other ShroudOn... to allow other scripts
 function ShroudOnLogout()
-	client.isLoggedIn = false
+	als.client.isLoggedIn = false
 end
 
 function ShroudOnMouseClick()
@@ -1157,9 +1173,9 @@ end
 
 function ShroudOnSceneLoaded(SceneName)
 	ui_getSceneName()
-	client.isLoggedIn = true
+	als.client.isLoggedIn = true
 end
 
 function ShroudOnSceneUnloaded()
-	--scene.name = ""
+	--als.scene.name = ""
 end

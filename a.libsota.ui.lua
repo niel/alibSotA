@@ -22,12 +22,12 @@
 ]]
 
 
-ui.rect = function(left, top, width, height)
+als.ui.rect = function(left, top, width, height)
 	local self = {
-		left = left * client.screen.pxptRatio,
-		top = top * client.screen.pxptRatio,
-		width = width * client.screen.pxptRatio,
-		height = height * client.screen.pxptRatio,
+		left = left * als.client.screen.pxptRatio,
+		top = top * als.client.screen.pxptRatio,
+		width = width * als.client.screen.pxptRatio,
+		height = height * als.client.screen.pxptRatio,
 		x1 = left,
 		y1 = top,
 		x2 = left + width,
@@ -66,13 +66,13 @@ ui.rect = function(left, top, width, height)
 	return self
 end
 
-ui.container = {
+als.ui.container = {
 	new = function(rect)
 		local self = {
 			list = {},
 			rect = rect,
 		}
-		setmetatable(self, {__index = ui.container})
+		setmetatable(self, {__index = als.ui.container})
 
 		return self
 	end,
@@ -155,16 +155,16 @@ ui.container = {
 	end,
 }
 
-ui.titlebar = {
+als.ui.titlebar = {
 	_new = function(self, caption, icon)
 
 		return self:new(caption, icon)
 	end,
 
 	new = function(caption, icon)
-		local lbl = ui.text(caption:style({ size = 14, bold = true }))
-		local ico = ui.image(icon)
-		local self = ui.container.new({left=0, top=0, width=lbl.rect.width, height=32})
+		local lbl = als.ui.text(caption:style({ size = 14, bold = true }))
+		local ico = als.ui.image(icon)
+		local self = als.ui.container.new({ left=0, top=0, width=lbl.rect.width, height=32})
 		lbl:zIndex(-1)
 		ico:zIndex(-1)
 		self:add("_caption", lbl, 32, 2, self.rect.width, 32)
@@ -189,18 +189,18 @@ ui.titlebar = {
 		return self.list["_icon"]
 	end,
 }
-setmetatable(ui.titlebar, {__index = ui.container, __call = ui.titlebar._new})
+setmetatable(als.ui.titlebar, { __index = als.ui.container, __call = als.ui.titlebar._new})
 
-ui.button = {
+als.ui.button = {
 	_new = function(self, caption)
 
 		return self:new(caption)
 	end,
 
 	new = function(caption)
-		local lbl = ui.text(caption:style({ size = 14, bold = true }))
-		local ico = ui.image("share/libsota/border3.png")
-		local self = ui.container.new({left=0, top=0, width=lbl.rect.width, height=32})
+		local lbl = als.ui.text(caption:style({ size = 14, bold = true }))
+		local ico = als.ui.image("share/libsota/border3.png")
+		local self = als.ui.container.new({ left=0, top=0, width=lbl.rect.width, height=32})
 		self:add("_caption", lbl, 2, 2, self.rect.width, 32)
 		self:add("_icon", ico, 0, 0, self.rect.width, 32)
 
@@ -223,9 +223,9 @@ ui.button = {
 		return self.list["_icon"]
 	end,
 }
-setmetatable(ui.button, {__index = ui.container, __call = ui.button._new})
+setmetatable(als.ui.button, { __index = als.ui.container, __call = als.ui.button._new})
 
-ui.window = {
+als.ui.window = {
 	background = function(self, object)
 		--self.list["_background"] = object
 		--object:moveTo(self.rect.left, self.rect.top)
@@ -235,23 +235,23 @@ ui.window = {
 		self:refresh()
 	end,
 }
-setmetatable(ui.window, {__index = ui.container})
+setmetatable(als.ui.window, { __index = als.ui.container})
 
-ui.application = {
+als.ui.application = {
 	new = function(name, icon, description)
-		ui.shell.list[tostring(name)] = {
+		als.ui.shell.list[tostring(name)] = {
 			list = {},
 			name = name,
 			description = description,
-			icon = ui.texture.add(0, 0, icon, true),
+			icon = als.ui.texture.add(0, 0, icon, true),
 			onActivate = nil,
 			onDeactivate = nil,
 		}
-		setmetatable(ui.shell.list[tostring(name)], {__index = ui.application})
+		setmetatable(als.ui.shell.list[tostring(name)], { __index = als.ui.application})
 
-		local self = ui.shell.list[tostring(name)]
+		local self = als.ui.shell.list[tostring(name)]
 
-		local ui_tex = ui.texture.add
+		local ui_tex = als.ui.texture.add
 		self.texture = function(left, top, filename, clamped, scaleMode, width, height)
 			local tex = ui_tex(left, top, filename, clamped, scaleMode, width, height)
 			self.list[#self.list + 1] = tex
@@ -259,12 +259,12 @@ ui.application = {
 			return tex
 		end
 
-		ui.texture.add = self.texture
-		ui.image = function(filename, scaleMode)
+		als.ui.texture.add = self.texture
+		als.ui.image = function(filename, scaleMode)
 			return ui_tex(0, 0, filename, true, scaleMode)
 		end
 
-		local ui_label = ui.label.add
+		local ui_label = als.ui.label.add
 		self.label = function(left, top, width, height, caption)
 			local lbl = ui_label(left, top, width, height, caption)
 			self.list[#self.list + 1] = lbl
@@ -272,14 +272,14 @@ ui.application = {
 			return lbl
 		end
 
-		ui.label.add = self.label
-		ui.text = function(text)
+		als.ui.label.add = self.label
+		als.ui.text = function(text)
 			local r = text:rect()
 
-			return ui.label.add(r.left, r.top, r.width, r.height, text)
+			return als.ui.label.add(r.left, r.top, r.width, r.height, text)
 		end
 
-		return ui.shell.list[tostring(name)]
+		return als.ui.shell.list[tostring(name)]
 	end,
 
 	remove = function(self)
@@ -302,26 +302,26 @@ ui.application = {
 		}
 
 		rect.z = table.maxn(self.list) * 10
-		setmetatable(self.list[tostring(name)], {__index = ui.window})
+		setmetatable(self.list[tostring(name)], {__index = als.ui.window})
 
 		return self.list[tostring(name)]
 	end,
 }
 
-ui.shell = {
+als.ui.shell = {
 	list = {},
 	active = nil,
 	dragging = nil,
 	hover = nil,
 	activate = function(name)
-		local app = ui.shell.list[tostring(name)]
+		local app = als.ui.shell.list[tostring(name)]
 		if app and app.onActivate then
 			app.onActivate()
 		end
 	end,
 
 	deactivate = function(name)
-		local app = ui.shell.list[tostring(name)]
+		local app = als.ui.shell.list[tostring(name)]
 		if app then
 			if app.onDeactivate then
 				app.onDeactivate()
@@ -334,17 +334,17 @@ ui.shell = {
 	end,
 
 	onMouseMove = function(button, x, y)
-		if ui.shell.hover and not ui.shell.hover.object.rect.hittest(x, y) then
-			if ui.shell.hover.object.onMouseLeave then ui.shell.hover.object.onMouseLeave() end
-			ui.shell.hover = nil
+		if als.ui.shell.hover and not als.ui.shell.hover.object.rect.hittest(x, y) then
+			if als.ui.shell.hover.object.onMouseLeave then als.ui.shell.hover.object.onMouseLeave() end
+			als.ui.shell.hover = nil
 		end
 
-		for _,a in next, ui.shell.list do
+		for _,a in next, als.ui.shell.list do
 			for _,o in next, a.list do
 				if o.typeName == "window" then
 					if o.rect.hittest(x, y) then
-						if not ui.shell.hover then
-							ui.shell.hover = {
+						if not als.ui.shell.hover then
+							als.ui.shell.hover = {
 								object = o,
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
@@ -365,40 +365,40 @@ ui.shell = {
 	end,
 
 	onMouseButton = function(state, button, x, y)
-		if ui.shell.dragging and state == "held" and button == 1 then
-			local f = ui.shell.dragging
+		if als.ui.shell.dragging and state == "held" and button == 1 then
+			local f = als.ui.shell.dragging
 			f.object:moveTo(x - f._x, y - f._y)
-		elseif ui.shell.dragging and state == "up" and button == 1 then
-			ui.shell.dragging = nil
+		elseif als.ui.shell.dragging and state == "up" and button == 1 then
+			als.ui.shell.dragging = nil
 		end
 
-		for _,a in next, ui.shell.list do
+		for _,a in next, als.ui.shell.list do
 			for _,o in next, a.list do
 				if o.typeName == "window" then
 					if o.rect.hittest(x, y) then
 						if state == "down" and button == 1 then
-							if not ui.shell.active then
-								ui.shell.active = {
+							if not als.ui.shell.active then
+								als.ui.shell.active = {
 									object = o,
 									_x = x - o.rect.left,
 									_y = y - o.rect.top,
 								}
 
-								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
+								als.ui.shell.active.object:zIndex(als.ui.shell.active.object:zIndex() + 100)
 							end
 
-							if o ~= ui.shell.active.object then
-								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() - 100)
-								ui.shell.active = {
+							if o ~= als.ui.shell.active.object then
+								als.ui.shell.active.object:zIndex(als.ui.shell.active.object:zIndex() - 100)
+								als.ui.shell.active = {
 									object = o,
 									_x = x - o.rect.left,
 									_y = y - o.rect.top,
 								}
 
-								ui.shell.active.object:zIndex(ui.shell.active.object:zIndex() + 100)
+								als.ui.shell.active.object:zIndex(als.ui.shell.active.object:zIndex() + 100)
 							end
 
-							ui.shell.dragging = {
+							als.ui.shell.dragging = {
 								object = o,
 								_x = x - o.rect.left,
 								_y = y - o.rect.top,
@@ -415,7 +415,7 @@ ui.shell = {
 	end,
 
 	onStart = function()
-		for _,a in next, ui.shell.list do
+		for _,a in next, als.ui.shell.list do
 			if a.onActivate then a.onActivate() end
 		end
 	end
@@ -423,23 +423,23 @@ ui.shell = {
 
 
 function ShroudOnStart()
-	ui.onInit(function()
+	als.ui.onInit(function()
 		--[[ starter für später
-		local texheight = 450 * client.screen.pxptRatio
-		local tex = ui.texture.add(0, (client.screen.height - texheight) / 2, "share/libsota/winbg.png", true, -1, 48, texheight)
+		local texheight = 450 * als.client.screen.pxptRatio
+		local tex = als.ui.texture.add(0, (als.client.screen.height - texheight) / 2, "share/libsota/winbg.png", true, -1, 48, texheight)
 		tex:visible(true)
-		local ico = ui.texture.add(4, tex.rect.top + 8, "share/libsota/lua.png", true, -1, 32, 32)
+		local ico = als.ui.texture.add(4, tex.rect.top + 8, "share/libsota/lua.png", true, -1, 32, 32)
 		ico:visible(true)
 		]]
-		local texsize = 36 * client.screen.pxptRatio
-		local slotsize = 40 * client.screen.pxptRatio
-		local tex = ui.texture.add(client.screen.width - (9 * slotsize), 2, "share/libsota/lua.png", true, -1, texsize, texsize)
+		local texsize = 36 * als.client.screen.pxptRatio
+		local slotsize = 40 * als.client.screen.pxptRatio
+		local tex = als.ui.texture.add(als.client.screen.width - (9 * slotsize), 2, "share/libsota/lua.png", true, -1, texsize, texsize)
 		tex:visible(true)
 	end)
 
-	ui.onMouseMove(ui.shell.onMouseMove)
-	ui.onStart(ui.shell.onStart)
-	ui.onMouseButton(ui.shell.onMouseButton)
+	als.ui.onMouseMove(als.ui.shell.onMouseMove)
+	als.ui.onStart(als.ui.shell.onStart)
+	als.ui.onMouseButton(als.ui.shell.onMouseButton)
 
 end -- ShroudOnStart
 

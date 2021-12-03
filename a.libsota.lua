@@ -1,4 +1,4 @@
--- libsota.0.4.8 by Catweazle Waldschrath
+-- alibsota.0.5.0-dev
 
 
 --[[
@@ -114,7 +114,7 @@ als.player = {
 }
 
 als.ui = {
-	version = "0.4.8",
+	version = "0.5.0-dev",
 
 	timer = {
 		list = {},

@@ -1,4 +1,4 @@
--- alibsota.0.5.0-dev
+-- alibsota.0.4.8
 
 
 --[[
@@ -115,7 +115,7 @@ als.player = {
 }
 
 als.ui = {
-	version = "0.5.0-dev",
+	version = "0.4.8",
 
 	timer = {
 		list = {},

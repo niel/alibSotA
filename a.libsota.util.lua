@@ -1,6 +1,6 @@
 -- libsota.util
 -- helper functions for global namespace to work with the als.ui.objects
--- depends on libsota.0.5.0-dev
+-- depends on libsota.0.4.8
 
 
 --[[

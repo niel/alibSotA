@@ -5,7 +5,7 @@
 function ShroudOnStart()
 
 -- apis are ready, time to compose our mod. (initialize)
-ui.onInit(function()
+als.ui.onInit(function()
 	local styleStillness = { size=14, color="#c4a000", bold=true }
 	local styleMoving = { size=14, color="yellow", bold=true }
 	local styleStanding = { size=14, color="#edd400", bold=true }
@@ -14,12 +14,12 @@ ui.onInit(function()
 		enabled = true,
 		label = createLabelWithShadow(),
 		timer = setInterval(0.25, function()
-			local loc = player.location
+			local loc = als.player.location
 			local caption = string.format("%s (x: %.2f, y: %.2f, z: %.2f)", loc.scene.name, loc.x, loc.y, loc.z)
-			
-			if player.isMoving then
+
+			if als.player.isMoving then
 				caption = caption:style(styleMoving)
-			elseif player.isStill then
+			elseif als.player.isStill then
 				caption = caption:style(styleStillness)
 			else
 				caption = caption:style(styleStanding)
@@ -30,13 +30,13 @@ ui.onInit(function()
 			setLabelCaption(loctrack.label, caption)
 		end),
 	}
-		
-	ui.command.add("loctrack", function()
+
+	als.ui.command.add("loctrack", function()
 		loctrack.enabled = not loctrack.enabled
 
 		setTimerEnabled(loctrack.timer, loctrack.enabled)
 		setLabelVisible(loctrack.label, loctrack.enabled)
-		
+
 		local msg = createLabel(nil, nil, 200, 120)
 		if isTimerEnabled(loctrack.timer) then
 			setLabelCaption(msg, "<size=18><color=white>locTracker activated</color></size>")
@@ -44,16 +44,16 @@ ui.onInit(function()
 			setLabelCaption(msg, "<size=18><color=white>locTracker deactivated</color></size>")
 		end
 		showLabel(msg)
-		setTimeout(3, function() ui.label.remove(msg) end)
+		setTimeout(3, function() als.ui.label.remove(msg) end)
 	end)
-	ui.shortcut.add("pressed", "RightAlt", "L", "loctrack")
+	als.ui.shortcut.add("pressed", "RightAlt", "L", "loctrack")
 
 
 	-- all mods are initialized, time to start/run
-	ui.onStart(function()
+	als.ui.onStart(function()
 		showLabel(loctrack.label)
 	end)
-	
+
 end)
 
 
